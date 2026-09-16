@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Platform App - iOS 26 Glass Edition</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+    --glass-bg: rgba(20, 25, 35, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-blur: blur(28px);
+    --accent: #fff;
+    --text-primary: #fff;
+    --text-secondary: #999;
+    --app-bg-gradient: radial-gradient(circle at top left, #0d111a, #000 80%);
+}
+
+body { background-color: #000; color: var(--text-primary); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Roboto, Helvetica, Arial, sans-serif; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+#app { width: 100%; max-width: 430px; height: 100%; position: relative; display: flex; flex-direction: column; background: var(--app-bg-gradient); }
+
+.header { display: flex; justify-content: space-between; align-items: center; padding: 20px; font-weight: 700; font-size: 18px; letter-spacing: 0.5px; background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-bottom: 1px solid var(--glass-border); position: sticky; top: 0; z-index: 50; transition: 0.3s; }
+.header-left { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.header-right { display: flex; gap: 20px; font-size: 20px; color: var(--text-primary); }
+.header-right i { cursor: pointer; transition: 0.2s; }
+.header-right i:active { opacity: 0.5; transform: scale(0.9); }
+.logo-icon { font-size: 20px; font-weight: 900; background: var(--text-primary); color: #000; border-radius: 10px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; transform: rotate(-10deg); }
+
+.view { display: none; flex: 1; overflow-y: auto; padding-bottom: 110px; scrollbar-width: none; }
+.view::-webkit-scrollbar { display: none; }
+.view.active { display: block; animation: smoothFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes smoothFade { from { opacity: 0; transform: scale(0.98) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+.bottom-nav { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); width: 88%; height: 65px; background: rgba(30, 35, 45, 0.35); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px); border: 1px solid rgba(255,255,255,0.12); border-radius: 35px; display: flex; justify-content: space-around; align-items: center; z-index: 50; box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1); padding: 0 10px; }
+.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #777; cursor: pointer; width: 50px; height: 50px; border-radius: 50%; transition: all 0.3s ease; position: relative; }
+.nav-item.active { color: var(--text-primary); }
+.nav-item.active::after { content: ''; position: absolute; bottom: 4px; width: 5px; height: 5px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px rgba(255,255,255,0.8); }
+.nav-item i { font-size: 22px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.nav-item:active i { transform: scale(0.8); }
+
+.notes-container { display: flex; overflow-x: auto; padding: 20px; gap: 18px; border-bottom: 1px solid rgba(255,255,255,0.05); scrollbar-width: none; }
+.note { position: relative; display: flex; flex-direction: column; align-items: center; min-width: 72px; cursor: pointer; }
+.note-bubble { background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); padding: 10px 14px; border-radius: 18px; font-size: 12px; margin-bottom: -15px; z-index: 2; border: 1px solid rgba(255,255,255,0.15); color: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.4); text-align: center; max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; transition: 0.2s; }
+.note.long-note .note-bubble { border-color: rgba(10, 132, 255, 0.5); }
+.note img { width: 72px; height: 72px; border-radius: 26px; object-fit: cover; border: 2px solid transparent; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); background: #222; }
+.note:active img { transform: scale(0.9); }
+.note span { font-size: 12px; margin-top: 10px; color: var(--text-secondary); font-weight: 500; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+.post { padding: 15px 0 25px; border-bottom: 1px solid rgba(255,255,255,0.05); animation: smoothFade 0.5s ease; }
+.post-header { display: flex; justify-content: space-between; align-items: center; padding: 0 20px 15px; cursor: pointer; }
+.user-info { display: flex; align-items: center; gap: 12px; }
+.user-avatar { width: 40px; height: 40px; border-radius: 14px; object-fit: cover; background: #222; }
+.user-name { font-size: 15px; font-weight: 600; color: #fff; letter-spacing: 0.3px; }
+.post-time { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.post-media { width: 100%; position: relative; overflow: hidden; background: #111; display: flex; justify-content: center; align-items: center;}
+.post-media img { width: 100%; display: block; object-fit: cover; max-height: 500px; transition: transform 0.5s; }
+.post-media:active img { transform: scale(0.98); border-radius: 20px; }
+.video-icon-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; color: rgba(255,255,255,0.8); background: rgba(0,0,0,0.4); width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 50%; backdrop-filter: blur(5px); pointer-events: none; }
+.post-actions { display: flex; justify-content: space-between; padding: 15px 20px 5px; }
+.post-actions-left { display: flex; gap: 22px; align-items: center; }
+.action-item { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; cursor: pointer; color: var(--text-primary); transition: 0.2s; }
+.action-item:active { opacity: 0.6; transform: scale(0.9); }
+.action-item i { font-size: 24px; }
+.liked { color: #ff3b30 !important; animation: heartPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes heartPop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+.post-caption { padding: 5px 20px; font-size: 14px; line-height: 1.5; color: #ddd; }
+.post-caption strong { color: #fff; }
+
+.explore-search-container { padding: 15px 20px; position: sticky; top: 65px; z-index: 40; background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-bottom: 1px solid var(--glass-border); }
+.explore-search { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 20px; display: flex; align-items: center; gap: 10px; color: #fff; backdrop-filter: blur(10px); }
+.explore-search input { background: transparent; border: none; outline: none; color: #fff; font-size: 15px; width: 100%; font-family: inherit; }
+.explore-search input::placeholder { color: #999; }
+.explore-categories { display: flex; gap: 10px; overflow-x: auto; padding: 15px 20px 5px; scrollbar-width: none; }
+.category-chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 15px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: 0.2s; }
+.category-chip.active { background: #fff; color: #000; }
+.explore-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px; margin-top: 10px; }
+.explore-item { aspect-ratio: 1; position: relative; overflow: hidden; cursor: pointer; background: #222; }
+.explore-item img { width: 100%; height: 100%; object-fit: cover; }
+.explore-item.large { grid-column: span 2; grid-row: span 2; }
+.explore-item .type-icon { position: absolute; top: 8px; right: 8px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: 18px; }
+
+.profile-header { display: flex; flex-direction: column; align-items: center; padding: 40px 20px 25px; }
+.profile-avatar-container { position: relative; margin-bottom: 20px; }
+.profile-avatar { width: 100px; height: 100px; border-radius: 30px; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.5); background: #222; }
+.profile-name { font-size: 24px; font-weight: 800; margin-bottom: 5px; letter-spacing: 0.5px; }
+.profile-bio { font-size: 15px; color: #aaa; margin-bottom: 25px; background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+.profile-stats { display: flex; gap: 50px; text-align: center; margin-bottom: 20px; }
+.stat-item { cursor: pointer; transition: 0.2s; }
+.stat-item:active { transform: scale(0.9); opacity: 0.7; }
+.stat-val { font-size: 20px; font-weight: 800; }
+.stat-label { font-size: 13px; color: #888; margin-top: 4px; font-weight: 500; }
+
+.profile-tabs-nav { display: flex; border-top: 1px solid rgba(255,255,255,0.05); margin-bottom: 5px; }
+.profile-tab-btn { flex: 1; text-align: center; padding: 12px 0; color: #666; font-size: 20px; cursor: pointer; transition: 0.3s; }
+.profile-tab-btn.active { color: #fff; border-bottom: 2px solid #fff; }
+.profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 2px; }
+.grid-item { aspect-ratio: 1; cursor: pointer; overflow: hidden; position: relative; background: #222; }
+.grid-item img { width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }
+.grid-item:active img { transform: scale(1.05); opacity: 0.8; }
+
+.portfolio-section { display: none; padding: 15px; animation: smoothFade 0.3s ease; }
+.portfolio-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 20px; margin-bottom: 15px; backdrop-filter: blur(15px); }
+.portfolio-card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+.portfolio-icon { width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 24px; color: #fff; }
+.portfolio-title { font-size: 18px; font-weight: 700; color: #fff; }
+.portfolio-subtitle { font-size: 13px; color: #aaa; margin-top: 4px; }
+.portfolio-desc { font-size: 14px; color: #ccc; line-height: 1.5; margin-bottom: 15px; }
+.portfolio-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.portfolio-tag { background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; color: #ddd; }
+
+.comments-section { padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+.comment { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; animation: smoothFade 0.3s ease; }
+.comment-left { display: flex; gap: 12px; }
+.comment-avatar { width: 32px; height: 32px; border-radius: 10px; object-fit: cover; background: #222; }
+.comment-text { font-size: 14px; line-height: 1.4; color: #ddd; }
+.comment-text strong { color: #fff; margin-right: 5px; cursor: pointer; }
+.comment-meta { font-size: 12px; color: #666; margin-top: 6px; display: flex; gap: 15px; font-weight: 500; }
+.comment-meta span { cursor: pointer; transition: 0.2s; }
+.comment-meta span:hover { color: #aaa; }
+.comment-like i { font-size: 14px; color: #666; cursor: pointer; transition: 0.2s; }
+.comment-like i.liked { color: #ff3b30; }
+.add-comment-bar { display: flex; align-items: center; gap: 10px; padding: 15px 20px; position: sticky; bottom: 0; background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-top: 1px solid var(--glass-border); }
+.add-comment-bar img { width: 35px; height: 35px; border-radius: 12px; object-fit: cover; background: #222; }
+.add-comment-bar input { flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 20px; color: #fff; font-size: 14px; outline: none; }
+.add-comment-bar button { background: transparent; border: none; color: #0a84ff; font-weight: 700; font-size: 15px; cursor: pointer; opacity: 0.5; transition: 0.2s; }
+.add-comment-bar input:valid ~ button { opacity: 1; }
+
+.msg-container { padding: 15px; }
+.msg-card { display: flex; align-items: center; padding: 15px; gap: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; backdrop-filter: blur(10px); }
+.msg-card img { width: 55px; height: 55px; border-radius: 18px; object-fit: cover; background: #222; }
+.msg-info { flex: 1; overflow: hidden; }
+.msg-name { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 4px; display: flex; justify-content: space-between; }
+.msg-time { font-size: 12px; color: #666; font-weight: 400; }
+.msg-preview { font-size: 14px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg-unread { background: #0a84ff; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 10px; }
+
+.settings-group { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; margin: 15px 20px; overflow: hidden; backdrop-filter: blur(15px); }
+.settings-list { list-style: none; padding: 0; }
+.settings-list li { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 16px; transition: background 0.2s; font-weight: 500; }
+.settings-list li:last-child { border-bottom: none; }
+.settings-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 14px; color: #fff; }
+.settings-list li > div { display: flex; align-items: center; }
+.toggle-switch { width: 50px; height: 30px; background: rgba(255,255,255,0.1); border-radius: 15px; position: relative; cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.2); }
+.toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; background: #fff; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+.toggle-switch.active { background: #30d158; border-color: #30d158; }
+.toggle-switch.active::after { transform: translateX(20px); }
+
+.modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 100; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.modal-overlay.show { opacity: 1; pointer-events: all; }
+.note-modal-content { background: rgba(30, 35, 45, 0.6); border: 1px solid rgba(255,255,255,0.15); width: 80%; border-radius: 30px; padding: 30px; text-align: center; transform: scale(0.9); transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+.modal-overlay.show .note-modal-content { transform: scale(1); }
+.note-modal-avatar { width: 80px; height: 80px; border-radius: 25px; margin-bottom: 15px; object-fit: cover; }
+.note-modal-name { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+.note-modal-text { font-size: 22px; line-height: 1.4; font-weight: 500; color: #fff; margin-bottom: 30px; font-style: italic; }
+.note-modal-close { background: #fff; color: #000; border: none; padding: 12px 30px; border-radius: 20px; font-size: 16px; font-weight: 700; cursor: pointer; }
+
+.grayscale { filter: grayscale(100%); }
+</style>
+</head>
+<body>
+<div id="app">
+    
+    <!-- HOME VIEW -->
+    <div id="home-view" class="view active">
+        <div class="header" style="border-bottom: none; background: transparent; backdrop-filter: none;">
+            <div class="header-left">
+                <div class="logo-icon">P</div> Platform
+            </div>
+            <div class="header-right">
+                <i class="fa-regular fa-compass" onclick="switchView('explore')"></i>
+                <i class="fa-regular fa-paper-plane" onclick="switchView('messages')"></i>
+            </div>
+        </div>
+        
+        <div class="notes-container" id="notes-slider">
+            <!-- Dynamically populated via JS -->
+        </div>
+
+        <div id="feed-container">
+            <!-- 100 Unique Posts dynamically populated via JS -->
+        </div>
+    </div>
+
+    <!-- EXPLORE VIEW -->
+    <div id="explore-view" class="view">
+        <div class="header" style="border-bottom: none; padding-bottom: 10px;">
+            <div class="header-left">Explore</div>
+        </div>
+        <div class="explore-search-container">
+            <div class="explore-search">
+                <i class="fa-solid fa-magnifying-glass" style="color: #999;"></i>
+                <input type="text" placeholder="Search people, pics, and videos...">
+            </div>
+        </div>
+        <div class="explore-categories">
+            <div class="category-chip active">For You</div>
+            <div class="category-chip">Photography</div>
+            <div class="category-chip">Coding</div>
+            <div class="category-chip">Modding</div>
+            <div class="category-chip">Math</div>
+            <div class="category-chip">Videos</div>
+        </div>
+        <div class="explore-grid" id="explore-grid">
+            <!-- 50 Items Generated via JS -->
+        </div>
+    </div>
+
+    <!-- MESSAGES VIEW -->
+    <div id="messages-view" class="view">
+        <div class="header">
+            <div class="header-left">Inbox</div>
+            <div class="header-right"><i class="fa-solid fa-pen-to-square" style="font-size: 18px;"></i></div>
+        </div>
+        <div class="explore-search-container" style="top: 0; padding-top: 0; border-bottom: none;">
+            <div class="explore-search" style="padding: 8px 15px;">
+                <i class="fa-solid fa-magnifying-glass" style="color: #999; font-size: 13px;"></i>
+                <input type="text" placeholder="Search messages..." style="font-size: 14px;">
+            </div>
+        </div>
+        <div class="msg-container" id="msg-list">
+            <!-- 30 Unique Messages Generated via JS -->
+        </div>
+    </div>
+
+    <!-- PROFILE VIEW -->
+    <div id="profile-view" class="view">
+        <div class="header" style="background: transparent; border-bottom: none;">
+            <div class="header-left"><i class="fa-solid fa-lock" style="font-size: 14px; margin-right: 5px;"></i> moulaylhani</div>
+            <div class="header-right"><i class="fa-solid fa-bars" onclick="switchView('settings')"></i></div>
+        </div>
+        
+        <div class="profile-header">
+            <div class="profile-avatar-container">
+                <img src="https://picsum.photos/seed/moulay_av/300/300" class="profile-avatar grayscale" alt="moulaylhani">
+            </div>
+            <div class="profile-name">Moulay Lhani</div>
+            <div class="profile-bio">Developer & Creator</div>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="stat-val">1</div>
+                    <div class="stat-label">Posts</div>
+                </div>
+                <div class="stat-item" id="follower-count">
+                    <div class="stat-val">20</div>
+                    <div class="stat-label">Followers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val">42</div>
+                    <div class="stat-label">Following</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-tabs-nav">
+            <div class="profile-tab-btn active" onclick="switchProfileTab('posts', this)"><i class="fa-solid fa-table-cells"></i></div>
+            <div class="profile-tab-btn" onclick="switchProfileTab('portfolio', this)"><i class="fa-solid fa-briefcase"></i></div>
+        </div>
+
+        <div class="profile-grid" id="profile-grid-section">
+            <div class="grid-item" onclick="switchView('post-detail')">
+                <img src="https://picsum.photos/seed/moulay_post1/600/600" class="grayscale" alt="Nature">
+            </div>
+        </div>
+
+        <div class="portfolio-section" id="profile-portfolio-section">
+            <div class="portfolio-card">
+                <div class="portfolio-card-header">
+                    <div class="portfolio-icon" style="background: rgba(10, 132, 255, 0.2); color: #0a84ff;"><i class="fa-solid fa-code"></i></div>
+                    <div>
+                        <div class="portfolio-title">MOULAY Platform</div>
+                        <div class="portfolio-subtitle">GitHub Pages Host</div>
+                    </div>
+                </div>
+                <div class="portfolio-desc">A custom-built brand website and platform interface designed with HTML5, CSS, and interactive JavaScript elements.</div>
+                <div class="portfolio-tags">
+                    <span class="portfolio-tag">HTML5</span>
+                    <span class="portfolio-tag">CSS Glass</span>
+                    <span class="portfolio-tag">JS</span>
+                </div>
+            </div>
+
+            <div class="portfolio-card">
+                <div class="portfolio-card-header">
+                    <div class="portfolio-icon" style="background: rgba(48, 209, 88, 0.2); color: #30d158;"><i class="fa-solid fa-chart-pie"></i></div>
+                    <div>
+                        <div class="portfolio-title">MCC Enterprise</div>
+                        <div class="portfolio-subtitle">Brand & Logo Design</div>
+                    </div>
+                </div>
+                <div class="portfolio-desc">Financial and mathematics enterprise branding concept, focusing on minimalist aesthetic and precise geometry.</div>
+                <div class="portfolio-tags">
+                    <span class="portfolio-tag">Design</span>
+                    <span class="portfolio-tag">Branding</span>
+                    <span class="portfolio-tag">Math</span>
+                </div>
+            </div>
+
+            <div class="portfolio-card">
+                <div class="portfolio-card-header">
+                    <div class="portfolio-icon" style="background: rgba(255, 159, 10, 0.2); color: #ff9f0a;"><i class="fa-solid fa-terminal"></i></div>
+                    <div>
+                        <div class="portfolio-title">C & Data Structures</div>
+                        <div class="portfolio-subtitle">Academic Projects</div>
+                    </div>
+                </div>
+                <div class="portfolio-desc">Implementations of numerical analysis algorithms and complex data structures strictly written in C.</div>
+                <div class="portfolio-tags">
+                    <span class="portfolio-tag">C Lang</span>
+                    <span class="portfolio-tag">Algorithms</span>
+                    <span class="portfolio-tag">Math</span>
+                </div>
+            </div>
+            
+            <div class="portfolio-card">
+                <div class="portfolio-card-header">
+                    <div class="portfolio-icon" style="background: rgba(94, 92, 230, 0.2); color: #5e5ce6;"><i class="fa-solid fa-gamepad"></i></div>
+                    <div>
+                        <div class="portfolio-title">PS4 Modding Tools</div>
+                        <div class="portfolio-subtitle">Firmware 9.00 Management</div>
+                    </div>
+                </div>
+                <div class="portfolio-desc">Exploration of homebrew utilities, FPKGi management, and DirectPackageInstaller workflows.</div>
+                <div class="portfolio-tags">
+                    <span class="portfolio-tag">Hardware</span>
+                    <span class="portfolio-tag">Modding</span>
+                    <span class="portfolio-tag">GoldHEN</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POST DETAIL VIEW -->
+    <div id="post-detail-view" class="view">
+        <div class="header">
+            <div class="header-left" onclick="switchView('profile')">
+                <i class="fa-solid fa-chevron-left"></i> <span>Post</span>
+            </div>
+        </div>
+        
+        <div class="post" style="border-bottom: none; padding-bottom: 0;">
+            <div class="post-header">
+                <div class="user-info">
+                    <img src="https://picsum.photos/seed/moulay_av/100/100" class="user-avatar grayscale" alt="moulaylhani">
+                    <div>
+                        <div class="user-name">moulaylhani</div>
+                        <div class="post-time">1 day ago</div>
+                    </div>
+                </div>
+                <i class="fa-solid fa-ellipsis" style="color: #666; padding: 10px;"></i>
+            </div>
+            <div class="post-media" ondblclick="likePost(this)">
+                <img src="https://picsum.photos/seed/moulay_post1/800/800" class="grayscale" alt="Grayscale UI">
+            </div>
+            <div class="post-actions" style="padding-bottom: 15px;">
+                <div class="post-actions-left">
+                    <div class="action-item" onclick="toggleBtnLike(this)"><i class="fa-regular fa-heart"></i> <span class="counter">856</span></div>
+                    <div class="action-item"><i class="fa-regular fa-comment"></i> <span id="main-comment-count">3</span></div>
+                </div>
+                <div class="action-item"><i class="fa-regular fa-bookmark"></i></div>
+            </div>
+            <div class="post-caption">
+                <strong>moulaylhani</strong> Finding peace in the cold. White and grey aesthetics. 🌲❄️ #darkmode #minimal
+            </div>
+
+            <!-- Interactive Comments -->
+            <div class="comments-section" id="moulay-comments">
+                <div class="comment">
+                    <div class="comment-left">
+                        <img src="https://picsum.photos/seed/commenter1/100/100" class="comment-avatar" alt="User">
+                        <div>
+                            <div class="comment-text"><strong>sarah_ui</strong> This view is absolutely stunning! Amazing shot.</div>
+                            <div class="comment-meta"><span onclick="alert('Replying to sarah_ui')">Reply</span> <span>18h</span></div>
+                        </div>
+                    </div>
+                    <div class="comment-like" onclick="toggleCommentLike(this)"><i class="fa-regular fa-heart"></i></div>
+                </div>
+
+                <div class="comment">
+                    <div class="comment-left">
+                        <img src="https://picsum.photos/seed/commenter2/100/100" class="comment-avatar" alt="User">
+                        <div>
+                            <div class="comment-text"><strong>alex_fern</strong> Where is this located? The mist is perfect.</div>
+                            <div class="comment-meta"><span onclick="alert('Replying to alex_fern')">Reply</span> <span>12h</span></div>
+                        </div>
+                    </div>
+                    <div class="comment-like" onclick="toggleCommentLike(this)"><i class="fa-regular fa-heart"></i></div>
+                </div>
+
+                <div class="comment">
+                    <div class="comment-left">
+                        <img src="https://picsum.photos/seed/commenter3/100/100" class="comment-avatar" alt="User">
+                        <div>
+                            <div class="comment-text"><strong>c_coder</strong> Love the contrast in this. 🖤🤍</div>
+                            <div class="comment-meta"><span onclick="alert('Replying to c_coder')">Reply</span> <span>5h</span></div>
+                        </div>
+                    </div>
+                    <div class="comment-like" onclick="toggleCommentLike(this)"><i class="fa-regular fa-heart"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <form class="add-comment-bar" onsubmit="addComment(event)">
+            <img src="https://picsum.photos/seed/moulay_av/100/100" class="grayscale" alt="You">
+            <input type="text" id="comment-input" placeholder="Add a comment..." required>
+            <button type="submit">Post</button>
+        </form>
+    </div>
+
+    <!-- SETTINGS VIEW -->
+    <div id="settings-view" class="view">
+        <div class="header">
+            <div class="header-left" onclick="switchView('profile')">
+                <i class="fa-solid fa-chevron-left"></i> <span>Settings</span>
+            </div>
+        </div>
+        
+        <div class="settings-group" style="margin-top: 30px;">
+            <ul class="settings-list">
+                <li onclick="alert('Account Details: \nName: Moulay Lhani\nUsername: moulaylhani\nAccount Type: Creator')">
+                    <div>
+                        <div class="settings-icon" style="background: #0a84ff;"><i class="fa-solid fa-user"></i></div>
+                        Account
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color: #666; font-size: 14px;"></i>
+                </li>
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #30d158;"><i class="fa-solid fa-lock"></i></div>
+                        Private Account
+                    </div>
+                    <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+                </li>
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #ff9f0a;"><i class="fa-solid fa-bell"></i></div>
+                        Push Notifications
+                    </div>
+                    <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="settings-group">
+            <ul class="settings-list">
+                <li onclick="alert('Currently locked to Dark Mode for iOS 26 Glass UI.')">
+                    <div>
+                        <div class="settings-icon" style="background: #5e5ce6;"><i class="fa-solid fa-moon"></i></div>
+                        Appearance
+                    </div>
+                    <div style="color: #888; font-size: 14px; display: flex; align-items: center; gap: 10px;">Dark <i class="fa-solid fa-chevron-right"></i></div>
+                </li>
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #32ade6;"><i class="fa-solid fa-eye-slash"></i></div>
+                        Hide Like Counts
+                    </div>
+                    <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="settings-group" style="margin-top: 40px; background: rgba(255,59,48,0.1); border-color: rgba(255,59,48,0.2);">
+            <ul class="settings-list">
+                <li style="justify-content: center; color: #ff3b30; font-weight: 700;" onclick="switchView('home')">
+                    Log Out
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- UPLOAD VIEW -->
+    <div id="upload-view" class="view">
+        <div class="header"><div class="header-left">Create</div></div>
+        <div style="display:flex; justify-content:center; align-items:center; height:70%; color:#666; font-size:20px; flex-direction:column; gap:20px;">
+            <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.1); border-radius: 25px; display:flex; justify-content:center; align-items:center; font-size:30px; color:#fff; cursor:pointer;" onclick="alert('Camera access requested.')"><i class="fa-solid fa-camera"></i></div>
+            Tap to open camera
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('home')" data-target="home"><i class="fa-solid fa-house"></i></div>
+        <div class="nav-item" onclick="switchView('explore')" data-target="explore"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <div class="nav-item" onclick="switchView('upload')" data-target="upload"><i class="fa-solid fa-plus" style="background:#fff; color:#000; padding:10px; border-radius:15px; font-size:18px;"></i></div>
+        <div class="nav-item" onclick="switchView('messages')" data-target="messages"><i class="fa-solid fa-comment-dots"></i></div>
+        <div class="nav-item" onclick="switchView('profile')" data-target="profile"><i class="fa-solid fa-user"></i></div>
+    </div>
+
+    <!-- MODAL FOR NOTES -->
+    <div class="modal-overlay" id="note-modal" onclick="closeNoteModal()">
+        <div class="note-modal-content" onclick="event.stopPropagation()">
+            <img src="" id="modal-avatar" class="note-modal-avatar">
+            <div class="note-modal-name" id="modal-name">Username</div>
+            <div class="note-modal-text" id="modal-text">"Quote text goes here."</div>
+            <button class="note-modal-close" onclick="closeNoteModal()">Close</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Safe image generator relying 100% on Picsum seeds to ensure uniqueness and loadability
+    function getImgSrc(seed, width, height) {
+        return `https://picsum.photos/seed/${encodeURIComponent(seed)}/${width}/${height}`;
+    }
+
+    // View Navigation Logic
+    function switchView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        let targetView = document.getElementById(viewId + '-view');
+        if(targetView) targetView.classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        let navTarget = viewId;
+        if(viewId === 'post-detail' || viewId === 'settings') navTarget = 'profile'; 
+        
+        let activeNav = document.querySelector(`.nav-item[data-target="${navTarget}"]`);
+        if(activeNav) activeNav.classList.add('active');
+
+        window.scrollTo(0, 0);
+    }
+
+    // Profile Tabs
+    function switchProfileTab(tab, el) {
+        document.querySelectorAll('.profile-tab-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        
+        if(tab === 'posts') {
+            document.getElementById('profile-grid-section').style.display = 'grid';
+            document.getElementById('profile-portfolio-section').style.display = 'none';
+        } else {
+            document.getElementById('profile-grid-section').style.display = 'none';
+            document.getElementById('profile-portfolio-section').style.display = 'block';
+        }
+    }
+
+    // Interactions
+    function toggleSwitch(el) {
+        el.classList.toggle('active');
+    }
+
+    function toggleBtnLike(btn) {
+        let icon = btn.querySelector('i');
+        let counter = btn.querySelector('.counter');
+        let isLiked = icon.classList.contains('liked');
+        let currentText = counter.innerText;
+        let isK = currentText.includes('K');
+        let num = parseFloat(currentText);
+
+        if(isLiked) {
+            icon.className = 'fa-regular fa-heart';
+            if(!isK) counter.innerText = num - 1;
+        } else {
+            icon.className = 'fa-solid fa-heart liked';
+            if(!isK) counter.innerText = num + 1;
+        }
+    }
+
+    function likePost(mediaContainer) {
+        let likeBtn = mediaContainer.nextElementSibling.querySelector('.action-item');
+        let icon = likeBtn.querySelector('i');
+        if(!icon.classList.contains('liked')) {
+            toggleBtnLike(likeBtn);
+        }
+        let img = mediaContainer.querySelector('img');
+        img.style.transform = 'scale(1.05)';
+        setTimeout(() => img.style.transform = 'scale(1)', 250);
+    }
+
+    function toggleCommentLike(icon) {
+        if(icon.classList.contains('liked')) {
+            icon.className = 'fa-regular fa-heart';
+        } else {
+            icon.className = 'fa-solid fa-heart liked';
+        }
+    }
+
+    function addComment(e) {
+        e.preventDefault();
+        const input = document.getElementById('comment-input');
+        const text = input.value.trim();
+        if(!text) return;
+
+        const commentHtml = `
+            <div class="comment">
+                <div class="comment-left">
+                    <img src="${getImgSrc('moulay_av', 100, 100)}" class="comment-avatar grayscale" alt="You">
+                    <div>
+                        <div class="comment-text"><strong>moulaylhani</strong> ${text}</div>
+                        <div class="comment-meta"><span onclick="alert('Replying to moulaylhani')">Reply</span> <span>Just now</span></div>
+                    </div>
+                </div>
+                <div class="comment-like" onclick="toggleCommentLike(this)"><i class="fa-regular fa-heart"></i></div>
+            </div>
+        `;
+        
+        document.getElementById('moulay-comments').insertAdjacentHTML('beforeend', commentHtml);
+        input.value = '';
+        let countEl = document.getElementById('main-comment-count');
+        countEl.innerText = parseInt(countEl.innerText) + 1;
+    }
+
+    // Modal Handling
+    function openNoteModal(name, avatar, text) {
+        document.getElementById('modal-name').innerText = name;
+        document.getElementById('modal-avatar').src = avatar;
+        document.getElementById('modal-text').innerText = `"${text}"`;
+        document.getElementById('note-modal').classList.add('show');
+    }
+    function closeNoteModal() {
+        document.getElementById('note-modal').classList.remove('show');
+    }
+
+    // Vocabulary for Unique Captions
+    const subjects = [
+        "The new firmware", "This UI design", "C pointer logic", "Los Santos streets", 
+        "My latest script", "Dark mode aesthetics", "Numerical analysis", "The GoldHEN payload", 
+        "CSS Grid layouts", "A minimal setup", "Data structures", "The compilation process", 
+        "Memory allocation", "A custom FPKGi", "This algorithm", "The glassmorphism effect",
+        "Backend architecture", "A sleek matrix", "Modding tools", "The frontend build"
+    ];
+    const actions = [
+        "is running flawlessly.", "looks completely insane.", "needs a massive refactor.", 
+        "keeps me up all night.", "bypassed the kernel limit.", "is simply beautiful.", 
+        "requires more debugging.", "finally compiled without errors.", "matches the vibe.", 
+        "is calculating perfectly.", "is a work of art.", "feels incredibly smooth.", 
+        "crashed the server again.", "is highly optimized.", "just got deployed."
+    ];
+    const tagsArr = [
+        "#coding #cplusplus", "#gta5 #online", "#ps4mods #jailbreak", "#math #algorithms", 
+        "#webdev #css", "#darkmode #ui", "#developer #tech", "#gaming #setup", 
+        "#software #engineering", "#glassmorphism #design"
+    ];
+
+    // Helper to generate a unique caption deterministically based on index
+    function generateUniqueCaption(index) {
+        const s = subjects[index % subjects.length];
+        const a = actions[(index * 3) % actions.length];
+        const t = tagsArr[(index * 7) % tagsArr.length];
+        return `${s} ${a} ${t}`;
+    }
+
+    // Pre-defined set of usernames
+    const baseNames = ["coder", "modder", "ui_ux", "dev", "hacker", "math_genius", "gta_fan", "sysadmin", "designer", "architect"];
+    function getUsername(index) {
+        return `${baseNames[index % baseNames.length]}_${(index * 13) % 99}`;
+    }
+
+    window.onload = () => {
+        
+        // 1. NOTES (Top Slider)
+        let notesHTML = '';
+        const notesTexts = ["Busy coding", "Firmware 9.00 working!", "GTA Online tonight?", "Segfault error...", "Math equations.", "Glass UI is top tier."];
+        for(let i=0; i<8; i++) {
+            let uName = getUsername(i + 100);
+            let text = notesTexts[i % notesTexts.length];
+            let isLong = i % 2 !== 0;
+            let seed = `note_av_${i}`;
+            notesHTML += `
+            <div class="note ${isLong ? 'long-note' : ''}" onclick="${isLong ? `openNoteModal('${uName}', '${getImgSrc(seed, 150, 150)}', '${text}')` : `alert('${text}')`}">
+                <div class="note-bubble">${isLong ? 'Read Note' : text}</div>
+                <img src="${getImgSrc(seed, 150, 150)}" alt="${uName}">
+                <span>${uName}</span>
+            </div>`;
+        }
+        document.getElementById('notes-slider').innerHTML = notesHTML;
+
+        // 2. FEED (Generate exactly 100 Unique Posts)
+        let feedHTML = '';
+        for(let i=0; i<100; i++) {
+            let uName = getUsername(i);
+            let caption = generateUniqueCaption(i);
+            let likes = Math.floor(Math.random() * 900) + 100;
+            if(i % 5 === 0) likes = (Math.random() * 20 + 1).toFixed(1) + "K";
+            let comments = Math.floor(Math.random() * 300) + 5;
+            let time = (i === 0) ? "Just now" : (i < 24 ? `${i} hours ago` : `${Math.floor(i/24)} days ago`);
+            
+            // 30% chance to be a simulated video (play icon overlay)
+            let isVideo = (i % 3 === 0);
+            let videoOverlay = isVideo ? `<div class="video-icon-overlay"><i class="fa-solid fa-play"></i></div>` : '';
+
+            feedHTML += `
+            <div class="post">
+                <div class="post-header">
+                    <div class="user-info">
+                        <img src="${getImgSrc('user_av_'+i, 100, 100)}" class="user-avatar" alt="${uName}">
+                        <div>
+                            <div class="user-name">${uName}</div>
+                            <div class="post-time">${time}</div>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-ellipsis" style="color: #666; padding: 10px;"></i>
+                </div>
+                <div class="post-media" ondblclick="likePost(this)">
+                    <img src="${getImgSrc('post_img_'+i, 800, Math.floor(Math.random() * 200 + 600))}" alt="Post Image">
+                    ${videoOverlay}
+                </div>
+                <div class="post-actions">
+                    <div class="post-actions-left">
+                        <div class="action-item" onclick="toggleBtnLike(this)"><i class="fa-regular fa-heart"></i> <span class="counter">${likes}</span></div>
+                        <div class="action-item"><i class="fa-regular fa-comment"></i> <span>${comments}</span></div>
+                    </div>
+                    <div class="action-item"><i class="fa-regular fa-bookmark"></i></div>
+                </div>
+                <div class="post-caption">
+                    <strong>${uName}</strong> ${caption}
+                </div>
+            </div>`;
+        }
+        document.getElementById('feed-container').innerHTML = feedHTML;
+
+        // 3. EXPLORE (Generate exactly 50 Grid Items)
+        let exploreHTML = '';
+        for(let i=0; i<50; i++) {
+            let isLarge = (i % 11 === 0) ? 'large' : '';
+            let isVideo = (i % 4 === 0);
+            let icon = isVideo ? '<i class="fa-solid fa-play type-icon"></i>' : (i % 7 === 0 ? '<i class="fa-solid fa-clone type-icon"></i>' : '');
+            
+            exploreHTML += `
+                <div class="explore-item ${isLarge}">
+                    <img src="${getImgSrc('explore_'+i, isLarge ? 800 : 400, isLarge ? 800 : 400)}" alt="Explore">
+                    ${icon}
+                </div>
+            `;
+        }
+        document.getElementById('explore-grid').innerHTML = exploreHTML;
+
+        // 4. MESSAGES (Generate exactly 30 Unique Messages)
+        let msgHTML = '';
+        const msgPreviews = [
+            "Sent an attachment.", "Reacted to your message.", "Can you send the C++ file?",
+            "The mod is working flawlessly.", "Check out this new UI concept.", "Are you online?",
+            "Calculated the final algorithm.", "GoldHEN loaded perfectly.", "Let's play GTA tonight.",
+            "Loved your recent post!", "Did you fix the memory leak?", "Thanks for the code!"
+        ];
+        
+        for(let i=0; i<30; i++) {
+            let uName = getUsername(i + 50);
+            let unread = (i < 4) ? `<span class="msg-unread">${Math.floor(Math.random()*3)+1}</span>` : '';
+            let timeStr = (i === 0) ? "Now" : (i < 10 ? `${i}h` : `${Math.floor(i/2)}d`);
+            let prevText = msgPreviews[i % msgPreviews.length];
+            
+            msgHTML += `
+            <div class="msg-card" onclick="alert('Opening chat with ${uName}')">
+                <img src="${getImgSrc('msg_av_'+i, 100, 100)}" alt="User">
+                <div class="msg-info">
+                    <div class="msg-name">${uName} <span class="msg-time">${timeStr}</span></div>
+                    <div class="msg-preview" style="${i < 4 ? 'color:#fff;font-weight:600;' : ''}">${prevText} ${unread}</div>
+                </div>
+            </div>`;
+        }
+        document.getElementById('msg-list').innerHTML = msgHTML;
+    };
+</script>
+</body>
+</html>
