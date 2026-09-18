@@ -1,0 +1,8 @@
+{
+  "name": "Platform App",
+  "description": "iOS 26 Glass Edition social platform with video posting, live video consultations with payment gateway, real-time AI assistance, and safe social discovery.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

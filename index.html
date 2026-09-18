@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Platform App - iOS 26 Glass Edition</title>
+    <meta name="description" content="iOS 26 Glass Edition social platform with video posting, live video consultations with payment gateway, real-time AI assistance, and safe social discovery.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="app">
+
+    <!-- AUTHENTICATION OVERLAY -->
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px;">
+                <div class="logo-icon" style="width: 36px; height: 36px; font-size: 22px;">P</div>
+                <div style="font-size: 22px; font-weight: 800; letter-spacing: 0.5px;">Platform</div>
+            </div>
+            <div style="text-align: center; font-size: 13px; color: #888; margin-bottom: 20px;">
+                iOS 26 Glass Edition • Real-Time Social
+            </div>
+
+            <!-- Primary Actions -->
+            <button type="button" class="social-btn" onclick="handleGoogleLogin()" style="width: 100%; margin-bottom: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);">
+                <i class="fa-brands fa-google" style="color: #ea4335; font-size: 16px;"></i> Continue with Google
+            </button>
+
+            <!-- Instant Demo Access -->
+            <button type="button" class="btn-primary" style="width: 100%; padding: 12px; font-size: 13px; font-weight: 700; margin-bottom: 16px; background: linear-gradient(135deg, rgba(10,132,255,0.85), rgba(94,92,230,0.85)); border: 1px solid rgba(255,255,255,0.25);" onclick="handleGuestLogin()">
+                <i class="fa-solid fa-bolt" style="color: #ffd60a; margin-right: 6px;"></i> Quick Demo Access (Explore Instantly)
+            </button>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin: 8px 0 14px; color: #555;">
+                <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+                <div style="font-size: 11px; text-transform: uppercase;">or email options</div>
+                <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+            </div>
+
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</div>
+                <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</div>
+                <div class="auth-tab" id="tab-reset" onclick="switchAuthTab('reset')">Reset</div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="form-login" onsubmit="handleEmailLogin(event)">
+                <input type="email" id="login-email" class="auth-input" placeholder="Email address" required autocomplete="email">
+                <input type="password" id="login-password" class="auth-input" placeholder="Password" required autocomplete="current-password">
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; margin-bottom: 10px;">Sign In with Email</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="form-register" style="display: none;" onsubmit="handleEmailRegister(event)">
+                <input type="text" id="reg-name" class="auth-input" placeholder="Display Name (e.g. Moulay Lhani)" required>
+                <input type="text" id="reg-username" class="auth-input" placeholder="Handle (e.g. moulaylhani)" required>
+                <input type="email" id="reg-email" class="auth-input" placeholder="Email address" required autocomplete="email">
+                <input type="password" id="reg-password" class="auth-input" placeholder="Password (min 6 chars)" minlength="6" required autocomplete="new-password">
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; margin-bottom: 10px;">Create Account</button>
+            </form>
+
+            <!-- Reset Form -->
+            <form id="form-reset" style="display: none;" onsubmit="handlePasswordReset(event)">
+                <input type="email" id="reset-email" class="auth-input" placeholder="Enter account email" required>
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; margin-bottom: 10px;">Send Reset Link</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- DESKTOP LEFT SIDEBAR -->
+    <aside class="desktop-sidebar">
+        <div class="sidebar-logo" onclick="switchView('home')">
+            <div class="logo-icon">P</div>
+            <span>Platform</span>
+        </div>
+
+        <nav class="sidebar-nav-list">
+            <div class="sidebar-nav-item active" id="snav-home" onclick="switchView('home')">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </div>
+            <div class="sidebar-nav-item" id="snav-explore" onclick="switchView('explore')">
+                <i class="fa-solid fa-compass"></i>
+                <span>Explore</span>
+            </div>
+            <div class="sidebar-nav-item" id="snav-search" onclick="switchView('search')">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span>Search</span>
+            </div>
+            <div class="sidebar-nav-item" id="snav-reels" onclick="switchView('reels')">
+                <i class="fa-solid fa-clapperboard"></i>
+                <span>Reels</span>
+                <span class="badge badge-og" style="margin-left: auto; font-size: 9px;">HOT</span>
+            </div>
+            <div class="sidebar-nav-item" id="snav-messages" onclick="switchView('messages')">
+                <i class="fa-solid fa-comment-dots"></i>
+                <span>Messages</span>
+            </div>
+            <div class="sidebar-nav-item" id="snav-notifs" onclick="openNotificationsModal()">
+                <i class="fa-solid fa-bell"></i>
+                <span>Notifications</span>
+                <span id="sidebar-notif-badge" class="sidebar-badge" style="display: none;">0</span>
+            </div>
+            <div class="sidebar-nav-item" id="snav-communities" onclick="switchView('communities')">
+                <i class="fa-solid fa-users"></i>
+                <span>Communities</span>
+            </div>
+            <div class="sidebar-nav-item" id="snav-trending" onclick="switchView('trending')">
+                <i class="fa-solid fa-fire"></i>
+                <span>Trending</span>
+            </div>
+            <div class="sidebar-nav-item" id="snav-boards" onclick="switchView('boards')">
+                <i class="fa-solid fa-thumbtack"></i>
+                <span>Boards & Saves</span>
+            </div>
+            <div class="sidebar-nav-item" id="snav-creator" onclick="switchView('creator')">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Creator Studio</span>
+            </div>
+            <div class="sidebar-nav-item" id="snav-profile" onclick="switchView('profile')">
+                <i class="fa-solid fa-user"></i>
+                <span>Profile</span>
+            </div>
+        </nav>
+
+        <button type="button" class="sidebar-create-btn" onclick="switchView('upload')">
+            <i class="fa-solid fa-plus"></i> New Post
+        </button>
+
+        <div class="sidebar-profile-card" onclick="switchView('profile')">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img id="sidebar-avatar" src="https://picsum.photos/seed/current/80/80" class="user-avatar" style="width: 38px; height: 38px;" alt="User">
+                <div style="overflow: hidden; max-width: 120px;">
+                    <div id="sidebar-name" style="font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">User</div>
+                    <div id="sidebar-handle" style="font-size: 11px; color: #888;">@handle</div>
+                </div>
+            </div>
+            <i class="fa-solid fa-ellipsis" style="color: #777;"></i>
+        </div>
+    </aside>
+
+    <!-- MAIN APPLICATION CONTENT COLUMN -->
+    <main class="main-content-column">
+
+    <!-- HOME VIEW -->
+    <div id="home-view" class="view active">
+        <div class="header">
+            <div class="header-left" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                <div class="logo-icon">P</div> Platform
+            </div>
+            <div class="header-right">
+                <button type="button" class="btn-consultation" onclick="openConsultationModal()" title="Book Live Video Consultation">
+                    <i class="fa-solid fa-video"></i> Live Call
+                </button>
+                <i class="fa-solid fa-wand-magic-sparkles" onclick="openAiAssistantModal()" title="Platform AI Assistant" style="color: #bf5af2;"></i>
+                <div style="position: relative; cursor: pointer;" onclick="openNotificationsModal()">
+                    <i class="fa-regular fa-bell"></i>
+                    <div id="notif-badge" class="notif-badge" style="display: none;">0</div>
+                </div>
+                <i class="fa-regular fa-paper-plane" onclick="switchView('messages')"></i>
+            </div>
+        </div>
+
+        <!-- Demo Mode Status Pill -->
+        <div id="demo-mode-pill" style="display: none; align-items: center; justify-content: space-between; background: rgba(255,214,10,0.12); border: 1px solid rgba(255,214,10,0.25); border-radius: 14px; padding: 7px 14px; margin: 10px 16px 4px; font-size: 12px; color: #ffd60a;">
+            <span><i class="fa-solid fa-bolt" style="margin-right: 6px;"></i> Demo Access Mode (Full Interactivity)</span>
+            <button type="button" class="btn-glass" onclick="handleGoogleLogin()" style="font-size: 11px; padding: 3px 10px; border-color: rgba(255,214,10,0.4); color: #fff; background: rgba(255,214,10,0.15);">
+                <i class="fa-brands fa-google" style="color:#ea4335; margin-right:4px;"></i> Connect Google
+            </button>
+        </div>
+
+        <!-- X-Style Algorithmic Feed Switcher -->
+        <div class="feed-tabs-header">
+            <div class="feed-tab active" id="tab-feed-foryou" onclick="switchFeedFilter('for-you')">For You</div>
+            <div class="feed-tab" id="tab-feed-following" onclick="switchFeedFilter('following')">Following</div>
+        </div>
+
+        <!-- Stories Tray (Instagram Style) -->
+        <div class="stories-container" id="stories-tray">
+            <!-- Dynamically populated stories with avatar rings -->
+        </div>
+
+        <!-- Status Notes Slider -->
+        <div class="notes-container" id="notes-slider">
+            <!-- Dynamic notes populated via JS -->
+        </div>
+
+        <!-- Real-Time Feed Container -->
+        <div id="feed-container">
+            <div style="padding: 40px 20px; text-align: center; color: #777;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <div>Loading real-time feed...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXPLORE VIEW -->
+    <div id="explore-view" class="view">
+        <div class="header">
+            <div class="header-left">Explore</div>
+            <div class="header-right">
+                <i class="fa-solid fa-rotate-right" onclick="renderExploreGrid()" title="Refresh"></i>
+            </div>
+        </div>
+        <div class="explore-search-container">
+            <div class="explore-search">
+                <i class="fa-solid fa-magnifying-glass" style="color: #999;"></i>
+                <input type="text" id="explore-input" placeholder="Search people, tags, and topics..." oninput="filterExplore(this.value)">
+            </div>
+        </div>
+        <div class="explore-categories" id="explore-categories-list">
+            <div class="category-chip active" onclick="selectExploreCategory('All', this)">All</div>
+            <div class="category-chip" onclick="selectExploreCategory('Design', this)">Design</div>
+            <div class="category-chip" onclick="selectExploreCategory('Tech', this)">Tech</div>
+            <div class="category-chip" onclick="selectExploreCategory('AI', this)">AI</div>
+            <div class="category-chip" onclick="selectExploreCategory('Aesthetic', this)">Aesthetic</div>
+            <div class="category-chip" onclick="selectExploreCategory('Architecture', this)">Architecture</div>
+            <div class="category-chip" onclick="selectExploreCategory('Motion', this)">Motion</div>
+            <div class="category-chip" onclick="selectExploreCategory('Photography', this)">Photography</div>
+            <div class="category-chip" onclick="selectExploreCategory('Gaming', this)">Gaming</div>
+        </div>
+
+        <!-- Trending Creators Spotlight Row -->
+        <div style="padding: 10px 16px 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 13px; font-weight: 700; color: #fff;">Featured Creators</span>
+                <span style="font-size: 11px; color: #0a84ff; cursor: pointer;" onclick="switchView('search')">See More</span>
+            </div>
+            <div id="explore-featured-creators" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px;">
+                <!-- Dynamically populated creator cards -->
+            </div>
+        </div>
+
+        <!-- Pinterest/Instagram Hybrid Masonry Grid -->
+        <div class="masonry-grid" id="explore-masonry">
+            <!-- Dynamically populated masonry pins via JS -->
+        </div>
+    </div>
+
+    <!-- SEARCH VIEW -->
+    <div id="search-view" class="view">
+        <div class="header">
+            <div class="header-left">Search</div>
+            <div class="header-right">
+                <i class="fa-solid fa-sliders" onclick="toggleSearchFilters()" title="Filter Search"></i>
+            </div>
+        </div>
+        <div class="explore-search-container">
+            <div class="explore-search">
+                <i class="fa-solid fa-magnifying-glass" style="color: #0a84ff;"></i>
+                <input type="text" id="global-search-input" placeholder="Search people, posts, tags, communities..." oninput="handleGlobalSearch(this.value)">
+                <i class="fa-solid fa-xmark" id="search-clear-btn" style="display: none; cursor: pointer; color: #888;" onclick="clearGlobalSearch()"></i>
+            </div>
+        </div>
+        <!-- Search Category Tabs -->
+        <div class="explore-categories" id="search-tabs">
+            <div class="category-chip active" onclick="switchSearchTab('top', this)">Top</div>
+            <div class="category-chip" onclick="switchSearchTab('users', this)">Users</div>
+            <div class="category-chip" onclick="switchSearchTab('posts', this)">Posts</div>
+            <div class="category-chip" onclick="switchSearchTab('tags', this)">Hashtags</div>
+            <div class="category-chip" onclick="switchSearchTab('communities', this)">Communities</div>
+        </div>
+
+        <!-- Recent & Trending Searches (Default State) -->
+        <div id="search-default-panel" style="padding: 16px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="font-size: 13px; font-weight: 700; color: #aaa; text-transform: uppercase;">Recent Searches</div>
+                <button type="button" class="btn-glass" onclick="clearRecentSearches()" style="font-size: 11px; padding: 3px 8px;">Clear All</button>
+            </div>
+            <div id="recent-searches-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px;">
+                <!-- Dynamic recent search chips -->
+            </div>
+
+            <div style="font-size: 13px; font-weight: 700; color: #aaa; text-transform: uppercase; margin-bottom: 12px;">Trending Topics & Searches</div>
+            <div id="trending-searches-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Dynamic trending search items -->
+            </div>
+        </div>
+
+        <!-- Search Results List -->
+        <div id="search-results-container" style="display: none; padding: 10px 16px;">
+            <!-- Rendered results -->
+        </div>
+    </div>
+
+    <!-- REELS / SHORT VIDEO VIEW -->
+    <div id="reels-view" class="view" style="padding-bottom: 0;">
+        <div class="reels-stage" id="reels-stage-container">
+            <div class="reel-video-container" id="current-reel-box">
+                <video id="reel-active-video" class="reel-video-element" loop playsinline autoplay muted></video>
+
+                <!-- Double Tap Heart Burst Animation -->
+                <div id="reel-heart-burst" class="heart-burst" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 90px; color: #ff2d55; pointer-events: none; z-index: 40; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);"><i class="fa-solid fa-heart"></i></div>
+
+                <!-- Action Rail (Right) -->
+                <div class="reel-action-rail">
+                    <div class="reel-action-btn" id="reel-btn-like" onclick="toggleReelLike()">
+                        <i class="fa-regular fa-heart" id="reel-icon-like"></i>
+                        <span class="reel-action-label" id="reel-like-count">1.4K</span>
+                    </div>
+                    <div class="reel-action-btn" onclick="openReelComments()">
+                        <i class="fa-regular fa-comment-dots"></i>
+                        <span class="reel-action-label" id="reel-comment-count">84</span>
+                    </div>
+                    <div class="reel-action-btn" onclick="openSaveToBoardModal(currentReelData?.id)">
+                        <i class="fa-regular fa-bookmark"></i>
+                        <span class="reel-action-label">Save</span>
+                    </div>
+                    <div class="reel-action-btn" onclick="shareCurrentReel()">
+                        <i class="fa-regular fa-paper-plane"></i>
+                        <span class="reel-action-label">Share</span>
+                    </div>
+                    <div class="reel-music-disc" onclick="openSoundDetailModal(currentReelData?.soundTitle)" title="View Sound">
+                        <i class="fa-solid fa-music" style="color: #fff; font-size: 14px;"></i>
+                    </div>
+                </div>
+
+                <!-- Reel Metadata Overlay (Bottom) -->
+                <div class="reel-overlay">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 800; font-size: 16px; letter-spacing: 0.5px;">Reels</span>
+                        <div style="display: flex; gap: 12px; font-size: 18px;">
+                            <i class="fa-solid fa-volume-high" id="reel-audio-toggle" style="cursor: pointer;" onclick="toggleReelMute()"></i>
+                            <i class="fa-solid fa-camera" onclick="switchView('upload')" style="cursor: pointer;"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                            <img id="reel-author-avatar" src="" class="user-avatar" style="width: 40px; height: 40px; border: 2px solid #fff;" alt="Author">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span id="reel-author-name" style="font-weight: 700; font-size: 14px; color: #fff;"></span>
+                                    <span class="badge badge-dev" id="reel-author-badge" style="display: none;">DEV</span>
+                                </div>
+                                <div id="reel-author-handle" style="font-size: 12px; color: #ccc;"></div>
+                            </div>
+                            <button type="button" class="btn-glass" id="reel-follow-btn" onclick="toggleFollowReelCreator()" style="margin-left: 10px; font-size: 11px; padding: 4px 12px; background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.4); color: #fff;">Follow</button>
+                        </div>
+                        <div id="reel-caption-text" style="font-size: 13px; line-height: 1.4; color: #eee; margin-bottom: 10px; max-height: 54px; overflow: hidden; text-overflow: ellipsis;"></div>
+                        <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); padding: 4px 10px; border-radius: 12px; font-size: 11px; color: #fff; cursor: pointer;" onclick="openSoundDetailModal(currentReelData?.soundTitle)">
+                            <i class="fa-solid fa-music" style="color: #0a84ff;"></i>
+                            <span id="reel-sound-title">Trending Audio • Original Sound</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Up/Down Flip Navigation Buttons -->
+                <div style="position: absolute; right: 16px; top: 70px; display: flex; flex-direction: column; gap: 8px; z-index: 30;">
+                    <button type="button" class="btn-glass" onclick="navigateReel(-1)" style="width: 36px; height: 36px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-chevron-up"></i></button>
+                    <button type="button" class="btn-glass" onclick="navigateReel(1)" style="width: 36px; height: 36px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-chevron-down"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMMUNITIES VIEW -->
+    <div id="communities-view" class="view">
+        <div class="header">
+            <div class="header-left">Communities</div>
+            <div class="header-right">
+                <i class="fa-solid fa-magnifying-glass" onclick="switchView('search')" title="Search"></i>
+            </div>
+        </div>
+        <div style="padding: 16px;">
+            <div style="font-size: 13px; color: #aaa; margin-bottom: 14px; line-height: 1.4;">
+                Join curated spaces to connect with passionate creators, share projects, and collaborate in focused feeds.
+            </div>
+            <div id="communities-list-container">
+                <!-- Dynamic communities -->
+            </div>
+        </div>
+    </div>
+
+    <!-- TRENDING VIEW (X-STYLE) -->
+    <div id="trending-view" class="view">
+        <div class="header">
+            <div class="header-left">Trending Now</div>
+            <div class="header-right">
+                <i class="fa-solid fa-rotate-right" onclick="renderTrendingList()" title="Refresh"></i>
+            </div>
+        </div>
+        <div class="explore-categories">
+            <div class="category-chip active" onclick="filterTrends('for-you', this)">For You</div>
+            <div class="category-chip" onclick="filterTrends('tech', this)">Technology</div>
+            <div class="category-chip" onclick="filterTrends('design', this)">Design</div>
+            <div class="category-chip" onclick="filterTrends('entertainment', this)">Entertainment</div>
+            <div class="category-chip" onclick="filterTrends('gaming', this)">Gaming</div>
+        </div>
+        <div style="padding: 14px 16px;" id="trending-items-container">
+            <!-- Dynamic trend cards -->
+        </div>
+    </div>
+
+    <!-- PINTEREST-STYLE BOARDS & SAVES VIEW -->
+    <div id="boards-view" class="view">
+        <div class="header">
+            <div class="header-left">Boards & Saves</div>
+            <div class="header-right">
+                <button type="button" class="btn-glass" onclick="openCreateBoardModal()" style="font-size: 12px; padding: 5px 12px;">+ New Board</button>
+            </div>
+        </div>
+        <div class="boards-grid" id="boards-grid-container">
+            <!-- Dynamic Pinterest Boards -->
+        </div>
+    </div>
+
+    <!-- CREATOR STUDIO & ANALYTICS DASHBOARD -->
+    <div id="creator-view" class="view">
+        <div class="header">
+            <div class="header-left">Creator Studio</div>
+            <div class="header-right">
+                <span class="badge badge-dev">PRO METRICS</span>
+            </div>
+        </div>
+        <div style="padding: 18px 16px;">
+            <!-- Summary Metric Cards -->
+            <div class="creator-metric-grid">
+                <div class="creator-metric-card">
+                    <div style="font-size: 12px; color: #888;">30-Day Impressions</div>
+                    <div class="creator-metric-num">148.2K</div>
+                    <div class="creator-metric-change"><i class="fa-solid fa-arrow-trend-up"></i> +24.8% vs last month</div>
+                </div>
+                <div class="creator-metric-card">
+                    <div style="font-size: 12px; color: #888;">Total Reach</div>
+                    <div class="creator-metric-num">82.6K</div>
+                    <div class="creator-metric-change"><i class="fa-solid fa-arrow-trend-up"></i> +18.4% unique viewers</div>
+                </div>
+                <div class="creator-metric-card">
+                    <div style="font-size: 12px; color: #888;">Engagement Rate</div>
+                    <div class="creator-metric-num">9.4%</div>
+                    <div class="creator-metric-change" style="color: #ffd60a;"><i class="fa-solid fa-bolt"></i> Above average</div>
+                </div>
+                <div class="creator-metric-card">
+                    <div style="font-size: 12px; color: #888;">Followers Gained</div>
+                    <div class="creator-metric-num">+2,410</div>
+                    <div class="creator-metric-change"><i class="fa-solid fa-arrow-trend-up"></i> +320 this week</div>
+                </div>
+            </div>
+
+            <!-- Glassmorphic 7-Day Performance SVG Chart -->
+            <div style="background: rgba(22, 28, 42, 0.6); border: 1px solid var(--glass-border); border-radius: 18px; padding: 16px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="font-size: 14px; font-weight: 700; color: #fff;">Weekly Impression Flow</div>
+                    <span style="font-size: 11px; color: #0a84ff; font-weight: 600;">7 Days Active</span>
+                </div>
+                <svg viewBox="0 0 500 140" style="width: 100%; height: auto; overflow: visible;">
+                    <defs>
+                        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#0a84ff" stop-opacity="0.5"/>
+                            <stop offset="100%" stop-color="#0a84ff" stop-opacity="0.0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M 0 110 Q 80 50, 160 80 T 320 40 T 500 20 L 500 140 L 0 140 Z" fill="url(#chartGrad)"/>
+                    <path d="M 0 110 Q 80 50, 160 80 T 320 40 T 500 20" fill="none" stroke="#0a84ff" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="160" cy="80" r="5" fill="#30d158" stroke="#fff" stroke-width="2"/>
+                    <circle cx="320" cy="40" r="5" fill="#ffd60a" stroke="#fff" stroke-width="2"/>
+                    <circle cx="500" cy="20" r="6" fill="#0a84ff" stroke="#fff" stroke-width="2"/>
+                </svg>
+                <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: #777;">
+                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                </div>
+            </div>
+
+            <!-- Top Content & Drafts Management -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="font-size: 14px; font-weight: 700; color: #fff;">Content & Drafts Manager</div>
+                <button type="button" class="btn-glass" onclick="openDraftsModal()" style="font-size: 11px; padding: 4px 10px;">Saved Drafts</button>
+            </div>
+            <div id="creator-top-posts" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Dynamically populated top posts -->
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATE POST VIEW -->
+    <div id="upload-view" class="view">
+        <div class="header">
+            <div class="header-left">Create</div>
+            <div class="header-right">
+                <button type="button" class="btn-glass" onclick="savePostDraft()" style="font-size: 11px; padding: 4px 10px; margin-right: 6px;">Save Draft</button>
+                <button type="button" class="btn-primary" id="btn-submit-post" onclick="submitPost()">Share</button>
+            </div>
+        </div>
+        <div style="padding: 16px 20px;">
+            <!-- Creation Mode Tabs -->
+            <div class="explore-categories" style="padding: 0 0 14px; margin-bottom: 12px; border-bottom: 1px solid var(--glass-border);">
+                <div class="category-chip active" id="cmode-photo" onclick="setComposerMode('photo', this)"><i class="fa-regular fa-image"></i> Photo</div>
+                <div class="category-chip" id="cmode-video" onclick="setComposerMode('video', this)"><i class="fa-solid fa-video"></i> Video</div>
+                <div class="category-chip" id="cmode-reel" onclick="setComposerMode('reel', this)"><i class="fa-solid fa-clapperboard"></i> Reel</div>
+                <div class="category-chip" id="cmode-text" onclick="setComposerMode('text', this)"><i class="fa-solid fa-font"></i> Text</div>
+                <div class="category-chip" id="cmode-poll" onclick="setComposerMode('poll', this)"><i class="fa-solid fa-square-poll-vertical"></i> Poll</div>
+                <div class="category-chip" id="cmode-carousel" onclick="setComposerMode('carousel', this)"><i class="fa-solid fa-images"></i> Carousel</div>
+                <div class="category-chip" id="cmode-live" onclick="openLiveBroadcastModal()" style="color: #ff3b30; border-color: rgba(255,59,48,0.4);"><i class="fa-solid fa-circle-dot"></i> Live</div>
+            </div>
+
+            <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px;">
+                <img id="composer-avatar" src="https://picsum.photos/seed/current/100/100" class="user-avatar" alt="You">
+                <div style="flex: 1;">
+                    <div id="composer-name" style="font-weight: 700; font-size: 15px; margin-bottom: 2px;">Current User</div>
+                    <div id="composer-handle" style="font-size: 12px; color: #888;">@handle</div>
+                </div>
+                <div id="composer-community-selector" style="display: flex; align-items: center; gap: 6px; font-size: 12px; background: rgba(255,255,255,0.06); padding: 5px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;" onclick="openSelectCommunityModal()">
+                    <i class="fa-solid fa-earth-americas" style="color: #0a84ff;"></i>
+                    <span id="composer-target-audience">Public</span>
+                </div>
+            </div>
+
+            <!-- Post Textarea -->
+            <textarea id="post-text-input" placeholder="What's on your mind? Share updates, insights, or media..." 
+                style="width: 100%; min-height: 100px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 14px; color: #fff; font-size: 15px; outline: none; resize: none; font-family: inherit; line-height: 1.5; margin-bottom: 12px;"></textarea>
+
+            <!-- Text Post Gradient Background Picker (when in Text Mode) -->
+            <div id="composer-gradient-picker" style="display: none; align-items: center; gap: 10px; margin-bottom: 14px;">
+                <span style="font-size: 12px; color: #888;">Card Gradient:</span>
+                <div class="composer-grad-pill active" onclick="selectTextGradient('default', this)" style="width: 24px; height: 24px; border-radius: 50%; background: #1a1e29; cursor: pointer; border: 2px solid #fff;"></div>
+                <div class="composer-grad-pill" onclick="selectTextGradient('sunset', this)" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #f093fb, #f5576c); cursor: pointer; border: 2px solid transparent;"></div>
+                <div class="composer-grad-pill" onclick="selectTextGradient('ocean', this)" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #4facfe, #00f2fe); cursor: pointer; border: 2px solid transparent;"></div>
+                <div class="composer-grad-pill" onclick="selectTextGradient('aurora', this)" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #43e97b, #38f9d7); cursor: pointer; border: 2px solid transparent;"></div>
+                <div class="composer-grad-pill" onclick="selectTextGradient('purple', this)" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); cursor: pointer; border: 2px solid transparent;"></div>
+            </div>
+
+            <!-- Poll Creator Box -->
+            <div id="composer-poll-box" style="display: none; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 14px; margin-bottom: 14px;">
+                <div style="font-size: 13px; font-weight: 700; color: #5ac8fa; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-square-poll-vertical"></i> Create a Poll
+                </div>
+                <input type="text" id="poll-opt-1" class="auth-input" placeholder="Option 1" style="margin-bottom: 8px; font-size: 13px;">
+                <input type="text" id="poll-opt-2" class="auth-input" placeholder="Option 2" style="margin-bottom: 8px; font-size: 13px;">
+                <input type="text" id="poll-opt-3" class="auth-input" placeholder="Option 3 (optional)" style="margin-bottom: 8px; font-size: 13px;">
+                <input type="text" id="poll-opt-4" class="auth-input" placeholder="Option 4 (optional)" style="margin-bottom: 10px; font-size: 13px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #888;">
+                    <span>Poll Length: <strong>24 Hours</strong></span>
+                </div>
+            </div>
+
+            <!-- Carousel Multi-Photo Builder -->
+            <div id="composer-carousel-box" style="display: none; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 14px; margin-bottom: 14px;">
+                <div style="font-size: 13px; font-weight: 700; color: #ff9f0a; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-images"></i> Multi-Image Carousel (Up to 10)
+                </div>
+                <div id="composer-carousel-previews" style="display: flex; gap: 8px; overflow-x: auto; padding: 6px 0; margin-bottom: 8px;">
+                    <!-- Previews of carousel images -->
+                </div>
+                <button type="button" class="btn-glass" onclick="triggerCarouselPhotoAdd()" style="font-size: 12px; padding: 6px 14px;">+ Add Slide Photo</button>
+            </div>
+
+            <!-- Quoted Post Preview (if quoting) -->
+            <div id="composer-quote-preview" style="display: none; position: relative; margin-bottom: 14px;">
+                <div class="quote-box" id="composer-quote-box"></div>
+                <button type="button" onclick="clearComposerQuote()" style="position: absolute; top: 10px; right: 28px; background: rgba(0,0,0,0.6); border: none; color: #fff; width: 22px; height: 22px; border-radius: 50%; cursor: pointer;">✕</button>
+            </div>
+
+            <!-- Media Preview Container (Photos & Videos) -->
+            <div id="composer-media-preview-box" style="display: none; position: relative; margin-bottom: 14px; border-radius: 16px; overflow: hidden; background: #05070a; border: 1px solid rgba(255,255,255,0.15);">
+                <img id="composer-image-preview" src="" alt="Preview" style="display: none; width: 100%; max-height: 300px; object-fit: cover;">
+                <video id="composer-video-preview" controls playsinline style="display: none; width: 100%; max-height: 300px; object-fit: contain;"></video>
+                <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px;">
+                    <button type="button" onclick="removeComposerMedia()" style="background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.2); color: #fff; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px;">✕</button>
+                </div>
+                <div id="composer-media-badge" style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #30d158; display: flex; align-items: center; gap: 5px;">
+                    <i class="fa-solid fa-shield-check"></i> Safe Screening Active
+                </div>
+            </div>
+
+            <!-- Location & Tag Details -->
+            <div id="composer-location-row" style="display: none; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 12px; margin-bottom: 12px; font-size: 12px;">
+                <div style="display: flex; align-items: center; gap: 6px; color: #0a84ff;">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span id="composer-location-label">San Francisco, CA</span>
+                </div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; color: #888;" onclick="clearComposerLocation()"></i>
+            </div>
+
+            <!-- Creation Quick Controls -->
+            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                <button type="button" class="btn-glass" onclick="triggerPhotoUpload()" style="display: flex; align-items: center; gap: 6px; font-size: 13px; padding: 7px 12px;">
+                    <i class="fa-regular fa-image" style="color: #30d158;"></i> Photo
+                </button>
+                <button type="button" class="btn-glass" onclick="triggerVideoUpload()" style="display: flex; align-items: center; gap: 6px; font-size: 13px; padding: 7px 12px;">
+                    <i class="fa-solid fa-video" style="color: #0a84ff;"></i> Video
+                </button>
+                <button type="button" class="btn-glass" onclick="pickLocationPrompt()" style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #ff9f0a;">
+                    <i class="fa-solid fa-location-dot"></i> Location
+                </button>
+                <button type="button" class="btn-glass" onclick="insertSampleVideo()" style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #5ac8fa;">
+                    <i class="fa-solid fa-film"></i> Sample Video
+                </button>
+                <button type="button" class="btn-glass" onclick="generateAiCaption()" id="btn-ai-caption" style="display: flex; align-items: center; gap: 6px; font-size: 12px; background: rgba(191,90,242,0.15); border-color: rgba(191,90,242,0.3); color: #bf5af2;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> AI Polish
+                </button>
+                <button type="button" class="btn-glass" onclick="clearComposer()" style="font-size: 12px; color: #ff453a; margin-left: auto;">
+                    Clear
+                </button>
+            </div>
+
+            <!-- Hidden File Inputs -->
+            <input type="file" id="composer-photo-file" accept="image/*" style="display: none;" onchange="handlePhotoFileSelected(event)">
+            <input type="file" id="composer-video-file" accept="video/mp4,video/webm,video/quicktime,video/*" style="display: none;" onchange="handleVideoFileSelected(event)">
+            <input type="file" id="composer-carousel-file" accept="image/*" multiple style="display: none;" onchange="handleCarouselFilesSelected(event)">
+
+            <!-- Optional Direct URL Input -->
+            <div style="margin-bottom: 12px;">
+                <input type="url" id="post-media-input" placeholder="Or paste Image/Video URL here..." 
+                    oninput="handleMediaUrlInput(this.value)"
+                    style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 14px; border-radius: 14px; color: #fff; font-size: 13px; outline: none;">
+            </div>
+
+            <!-- Hashtag & Mention Helper Chips -->
+            <div style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px;">
+                <span class="category-chip" style="font-size: 11px; padding: 3px 9px;" onclick="insertTextToPost(' #iOS26Glass')">#iOS26Glass</span>
+                <span class="category-chip" style="font-size: 11px; padding: 3px 9px;" onclick="insertTextToPost(' #WebDesign')">#WebDesign</span>
+                <span class="category-chip" style="font-size: 11px; padding: 3px 9px;" onclick="insertTextToPost(' #Tech')">#Tech</span>
+                <span class="category-chip" style="font-size: 11px; padding: 3px 9px;" onclick="insertTextToPost(' #Creative')">#Creative</span>
+                <span class="category-chip" style="font-size: 11px; padding: 3px 9px;" onclick="insertTextToPost(' @ai')">@ai</span>
+            </div>
+
+            <!-- Adult Content Restriction Banner -->
+            <div style="background: rgba(48,209,88,0.08); border: 1px solid rgba(48,209,88,0.2); border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 12px; color: #bbb;">
+                <i class="fa-solid fa-shield-halved" style="color: #30d158; font-size: 15px;"></i>
+                <div style="line-height: 1.4;">
+                    <strong style="color: #fff;">Community Safety & Real-Time Screening</strong>:
+                    Explicit, adult, or abusive content is filtered automatically to ensure a safe creative platform.
+                </div>
+            </div>
+
+            <!-- Emoji Quick Row -->
+            <div style="font-size: 12px; color: #777; margin-bottom: 6px;">Quick Emoji Insertion</div>
+            <div class="emoji-row" id="post-emoji-row">
+                <span class="emoji-btn" onclick="insertEmojiToPost('🔥')">🔥</span>
+                <span class="emoji-btn" onclick="insertEmojiToPost('🚀')">🚀</span>
+                <span class="emoji-btn" onclick="insertEmojiToPost('🎬')">🎬</span>
+                <span class="emoji-btn" onclick="insertEmojiToPost('✨')">✨</span>
+                <span class="emoji-btn" onclick="insertEmojiToPost('💻')">💻</span>
+                <span class="emoji-btn" onclick="insertEmojiToPost('⚡')">⚡</span>
+                <span class="emoji-btn" onclick="insertEmojiToPost('💯')">💯</span>
+                <span class="emoji-btn" onclick="insertEmojiToPost('👀')">👀</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MESSAGES VIEW -->
+    <div id="messages-view" class="view">
+        <div class="header">
+            <div class="header-left">Direct Messages</div>
+            <div class="header-right">
+                <i class="fa-solid fa-robot" onclick="openChatWithAi()" title="Chat with Platform AI" style="color: #bf5af2;"></i>
+            </div>
+        </div>
+        <div class="explore-search-container" style="top: 0; padding-top: 0; border-bottom: none;">
+            <div class="explore-search" style="padding: 8px 14px;">
+                <i class="fa-solid fa-magnifying-glass" style="color: #999; font-size: 13px;"></i>
+                <input type="text" placeholder="Search conversations..." id="msg-search" oninput="filterMessages(this.value)" style="font-size: 13px;">
+            </div>
+        </div>
+        <div class="msg-container" id="msg-list">
+            <!-- Direct conversations populated via JS -->
+        </div>
+    </div>
+
+    <!-- 1-ON-1 CHAT VIEW -->
+    <div id="chat-view">
+        <div class="chat-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-chevron-left" style="font-size: 18px; cursor: pointer; padding: 4px;" onclick="closeChatView()"></i>
+                <div class="chat-user-meta">
+                    <img id="chat-header-avatar" src="" class="chat-avatar" alt="Chat User">
+                    <div>
+                        <div id="chat-header-name" style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;"></div>
+                        <div id="chat-header-status" style="font-size: 11px; color: #30d158;"><i class="fa-solid fa-lock" style="font-size: 9px; color: #ffd60a;"></i> Encrypted • Online</div>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <button type="button" class="chat-action-btn" onclick="startConvoAudioCall()" title="Start Encrypted Voice Call">
+                    <i class="fa-solid fa-phone"></i>
+                </button>
+                <button type="button" class="chat-action-btn" onclick="startConvoVideoCall()" title="Start Live Video Call">
+                    <i class="fa-solid fa-video"></i>
+                </button>
+                <button type="button" class="btn-glass" onclick="triggerAiSmartReply()" id="btn-ai-reply" style="font-size: 11px; padding: 5px 10px; color: #bf5af2; border-color: rgba(191,90,242,0.3);">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> AI
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages-container">
+            <!-- Messages streamed in real time -->
+        </div>
+
+        <!-- Voice Recording Live Bar (Appears during audio recording) -->
+        <div id="voice-recording-bar">
+            <div style="display: flex; align-items: center; gap: 8px; color: #ff3b30; font-weight: 700; font-size: 13px;">
+                <span class="recording-dot"></span>
+                <span id="recording-timer">0:00</span>
+                <span style="font-size: 11px; color: #ccc; font-weight: 500;">Recording Voice Message...</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn-glass" onclick="cancelVoiceRecording()" style="color: #ff3b30; font-size: 11px; padding: 4px 10px;">Cancel</button>
+                <button type="button" class="btn-primary" onclick="stopAndSendVoiceRecording()" style="font-size: 11px; padding: 4px 14px; background: #ff3b30; border-color: #ff3b30;">Send</button>
+            </div>
+        </div>
+
+        <!-- Emoji Quick Strip for Chat -->
+        <div style="padding: 0 16px; background: var(--glass-bg);">
+            <div class="emoji-row" style="padding: 4px 0;">
+                <span class="emoji-btn" onclick="insertEmojiToChat('👍')">👍</span>
+                <span class="emoji-btn" onclick="insertEmojiToChat('🔥')">🔥</span>
+                <span class="emoji-btn" onclick="insertEmojiToChat('😂')">😂</span>
+                <span class="emoji-btn" onclick="insertEmojiToChat('🚀')">🚀</span>
+                <span class="emoji-btn" onclick="insertEmojiToChat('❤️')">❤️</span>
+                <span class="emoji-btn" onclick="insertEmojiToChat('✨')">✨</span>
+                <span class="emoji-btn" onclick="insertEmojiToChat('⚡')">⚡</span>
+            </div>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <form class="chat-input-bar" onsubmit="handleSendChatMessage(event)">
+            <button type="button" class="chat-mic-btn" id="btn-chat-mic" onclick="toggleVoiceRecording()" title="Record Voice Message">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+            <input type="text" id="chat-input" placeholder="Encrypted message..." autocomplete="off">
+            <button type="submit" class="btn-primary" style="padding: 10px 18px; border-radius: 20px;">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- PROFILE VIEW -->
+    <div id="profile-view" class="view">
+        <div class="header" style="background: transparent; border-bottom: none;">
+            <div class="header-left" id="profile-header-handle">
+                <i class="fa-solid fa-lock" id="profile-lock-icon" style="display: none; font-size: 13px; margin-right: 4px; color: #ffd60a;"></i> @profile
+            </div>
+            <div class="header-right">
+                <i class="fa-solid fa-bars" onclick="switchView('settings')"></i>
+            </div>
+        </div>
+
+        <div class="profile-header">
+            <div class="profile-avatar-container">
+                <img id="profile-avatar-img" src="https://picsum.photos/seed/moulay_av/300/300" class="profile-avatar" alt="Avatar">
+            </div>
+            <div class="profile-name">
+                <span id="profile-display-name">User Name</span>
+                <span id="profile-badges"></span>
+            </div>
+            <div class="profile-handle" id="profile-username-tag">@username</div>
+            <div id="profile-private-pill" style="display: none; font-size: 11px; color: #ffd60a; margin: 4px 0 2px;"><i class="fa-solid fa-lock"></i> Private Account</div>
+            <div class="profile-bio" id="profile-bio-text">Developer & Creator</div>
+
+            <div class="profile-actions-bar">
+                <button type="button" class="btn-glass" onclick="openEditProfileModal()">Edit Profile</button>
+                <button type="button" class="btn-glass" onclick="shareProfile()">Share Profile</button>
+                <button type="button" class="btn-glass" onclick="openQrProfileModal()" title="View QR Code"><i class="fa-solid fa-qrcode"></i></button>
+            </div>
+
+            <div class="profile-stats">
+                <div class="stat-item" onclick="switchProfileTab('posts')" style="cursor: pointer;">
+                    <div class="stat-val" id="profile-stat-posts">0</div>
+                    <div class="stat-label">Posts</div>
+                </div>
+                <div class="stat-item" onclick="openUsersListModal('followers')" style="cursor: pointer;" title="View Followers">
+                    <div class="stat-val" id="profile-stat-followers">0</div>
+                    <div class="stat-label">Followers</div>
+                </div>
+                <div class="stat-item" onclick="openUsersListModal('following')" style="cursor: pointer;" title="View Following">
+                    <div class="stat-val" id="profile-stat-following">0</div>
+                    <div class="stat-label">Following</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-tabs-nav">
+            <div class="profile-tab-btn active" id="btn-tab-posts" onclick="switchProfileTab('posts')" title="Posts">
+                <i class="fa-solid fa-table-cells"></i>
+            </div>
+            <div class="profile-tab-btn" id="btn-tab-reels" onclick="switchProfileTab('reels')" title="Reels & Videos">
+                <i class="fa-solid fa-clapperboard"></i>
+            </div>
+            <div class="profile-tab-btn" id="btn-tab-saved" onclick="switchProfileTab('saved')" title="Saved Posts">
+                <i class="fa-solid fa-bookmark"></i>
+            </div>
+            <div class="profile-tab-btn" id="btn-tab-portfolio" onclick="switchProfileTab('portfolio')" title="Showcase Projects">
+                <i class="fa-solid fa-briefcase"></i>
+            </div>
+        </div>
+
+        <!-- Posts Grid -->
+        <div class="profile-grid" id="profile-grid-section">
+            <!-- Dynamic user posts -->
+        </div>
+
+        <!-- Reels & Videos Grid -->
+        <div class="profile-grid" id="profile-reels-section" style="display: none;">
+            <!-- Dynamic user reels -->
+        </div>
+
+        <!-- Saved Posts Section -->
+        <div class="profile-grid" id="profile-saved-section" style="display: none;">
+            <!-- Dynamic saved posts -->
+        </div>
+
+        <!-- Portfolio Cards -->
+        <div class="portfolio-section" id="profile-portfolio-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
+                <div style="font-size: 14px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px;">Showcase Projects</div>
+                <button type="button" class="btn-glass" onclick="openAddProjectModal()" style="font-size: 11px; padding: 4px 12px;">+ Add Project</button>
+            </div>
+            <div id="portfolio-cards-container">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS VIEW -->
+    <div id="settings-view" class="view">
+        <div class="header">
+            <div class="header-left" onclick="switchView('profile')">
+                <i class="fa-solid fa-chevron-left"></i> <span>Settings & Privacy</span>
+            </div>
+        </div>
+
+        <!-- Instagram-Style Privacy & Account Controls -->
+        <div class="settings-group" style="margin-top: 20px;">
+            <div style="padding: 10px 18px 4px; font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Account & Privacy (Instagram)</div>
+            <ul class="settings-list">
+                <li onclick="openEditProfileModal()">
+                    <div>
+                        <div class="settings-icon" style="background: #0a84ff;"><i class="fa-solid fa-user"></i></div>
+                        Edit Profile & Bio
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color: #666; font-size: 13px;"></i>
+                </li>
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #30d158;"><i class="fa-solid fa-lock"></i></div>
+                        Private Account
+                    </div>
+                    <div class="toggle-switch" id="settings-private-toggle" onclick="togglePrivateAccount()"></div>
+                </li>
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #e0245e;"><i class="fa-solid fa-heart-circle-check"></i></div>
+                        Hide Like & View Counts
+                    </div>
+                    <div class="toggle-switch" id="settings-hide-likes-toggle" onclick="toggleHideLikeCounts()"></div>
+                </li>
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #34c759;"><i class="fa-solid fa-circle-dot"></i></div>
+                        Show Activity Status
+                    </div>
+                    <div class="toggle-switch active" id="settings-activity-status-toggle" onclick="this.classList.toggle('active'); showToast('Activity status updated');"></div>
+                </li>
+                <li onclick="openBlockedUsersModal()">
+                    <div>
+                        <div class="settings-icon" style="background: #ff453a;"><i class="fa-solid fa-user-slash"></i></div>
+                        Blocked Accounts
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color: #666; font-size: 13px;"></i>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Twitter / X Style Feed & Content Preferences -->
+        <div class="settings-group">
+            <div style="padding: 10px 18px 4px; font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Feed & Content Flow (X Style)</div>
+            <ul class="settings-list">
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #1d9bf0;"><i class="fa-solid fa-sliders"></i></div>
+                        Default Feed Algorithm
+                    </div>
+                    <div style="font-size: 12px; color: #1d9bf0; font-weight: 700;" id="settings-default-feed-label">For You (Curated)</div>
+                </li>
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #ff3b30;"><i class="fa-solid fa-shield-halved"></i></div>
+                        Adult & Sensitive Filter
+                    </div>
+                    <div style="font-size: 12px; color: #30d158; font-weight: 700;"><i class="fa-solid fa-check"></i> Strict AI Screening</div>
+                </li>
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #5856d6;"><i class="fa-solid fa-comments"></i></div>
+                        Allow DM Requests
+                    </div>
+                    <div class="toggle-switch active" onclick="this.classList.toggle('active'); showToast('DM request permissions updated');"></div>
+                </li>
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #ff9f0a;"><i class="fa-solid fa-bell"></i></div>
+                        Push Notifications
+                    </div>
+                    <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Security & Encrypted Communication -->
+        <div class="settings-group">
+            <div style="padding: 10px 18px 4px; font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Security & Encryption</div>
+            <ul class="settings-list">
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #ffd60a; color: #000;"><i class="fa-solid fa-lock"></i></div>
+                        End-to-End Encryption (E2EE)
+                    </div>
+                    <div style="font-size: 12px; color: #ffd60a; font-weight: 700;">256-Bit Active</div>
+                </li>
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #30d158;"><i class="fa-solid fa-fingerprint"></i></div>
+                        Two-Factor Authentication
+                    </div>
+                    <div style="font-size: 12px; color: #30d158; font-weight: 700;">Enabled</div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Identity Badges: Mohamedhuguh@gmail.com Owner Only -->
+        <div class="settings-group">
+            <div style="padding: 10px 18px 4px; font-size: 11px; font-weight: 700; color: #777; text-transform: uppercase;">Identity Badges (Owner Only)</div>
+            <ul class="settings-list">
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #5e5ce6;"><i class="fa-solid fa-shield-halved"></i></div>
+                        Developer Badge (DEV)
+                    </div>
+                    <div id="settings-dev-status" style="font-size: 13px; color: #5ac8fa; font-weight: 700;">Active</div>
+                </li>
+                <li>
+                    <div>
+                        <div class="settings-icon" style="background: #ffd60a; color: #000;"><i class="fa-solid fa-crown"></i></div>
+                        Early Adopter (OG)
+                    </div>
+                    <div id="settings-og-status" style="font-size: 13px; color: #ffd60a; font-weight: 700;">Active</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="settings-group" style="background: rgba(255,59,48,0.08); border-color: rgba(255,59,48,0.2); margin-top: 24px;">
+            <ul class="settings-list">
+                <li style="justify-content: center; color: #ff3b30; font-weight: 700;" onclick="handleSignOut()">
+                    <i class="fa-solid fa-right-from-bracket" style="margin-right: 8px;"></i> Sign Out
+                </li>
+            </ul>
+        </div>
+    </div>
+    </main> <!-- End of main-content-column -->
+
+    <!-- DESKTOP RIGHT RAIL -->
+    <aside class="desktop-right-rail">
+        <!-- Search widget -->
+        <div class="explore-search" style="padding: 10px 14px;">
+            <i class="fa-solid fa-magnifying-glass" style="color: #888; font-size: 13px;"></i>
+            <input type="text" placeholder="Search Platform..." onfocus="switchView('search')" oninput="handleGlobalSearch(this.value)" style="font-size: 13px;">
+        </div>
+
+        <!-- Quick AI & Live Consultation Promo -->
+        <div class="rail-widget" style="background: linear-gradient(135deg, rgba(191,90,242,0.15), rgba(10,132,255,0.15)); border-color: rgba(191,90,242,0.3);">
+            <div style="font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-wand-magic-sparkles" style="color: #bf5af2;"></i> Real-Time AI Assistant
+            </div>
+            <div style="font-size: 12px; color: #ccc; line-height: 1.4; margin-bottom: 12px;">
+                Get instant post captions, code review, tech answers, and content ideas powered by intelligence.
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn-glass" onclick="openAiAssistantModal()" style="font-size: 11px; padding: 5px 12px; flex: 1; color: #bf5af2; border-color: rgba(191,90,242,0.4);">Ask AI</button>
+                <button type="button" class="btn-glass" onclick="openConsultationModal()" style="font-size: 11px; padding: 5px 12px; flex: 1; color: #30d158; border-color: rgba(48,209,88,0.4);">Book Call</button>
+            </div>
+        </div>
+
+        <!-- What's Happening Widget (X-Style Trends) -->
+        <div class="rail-widget">
+            <div class="rail-widget-title">
+                <span>What's Happening</span>
+                <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 12px; color: #888; cursor: pointer;" onclick="switchView('trending')"></i>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="cursor: pointer;" onclick="searchByTag('#iOS26Glass')">
+                    <div style="font-size: 11px; color: #888;">Trending in Tech • Technology</div>
+                    <div style="font-size: 13px; font-weight: 700; color: #fff;">#iOS26Glass</div>
+                    <div style="font-size: 11px; color: #888;">52.4K posts</div>
+                </div>
+                <div style="cursor: pointer;" onclick="searchByTag('#WebDesign')">
+                    <div style="font-size: 11px; color: #888;">Design & UI • Trending</div>
+                    <div style="font-size: 13px; font-weight: 700; color: #fff;">#WebDesign</div>
+                    <div style="font-size: 11px; color: #888;">34.8K posts</div>
+                </div>
+                <div style="cursor: pointer;" onclick="searchByTag('#CyberpunkTech')">
+                    <div style="font-size: 11px; color: #888;">Creative Coding • Hot</div>
+                    <div style="font-size: 13px; font-weight: 700; color: #fff;">#CyberpunkTech</div>
+                    <div style="font-size: 11px; color: #888;">18.1K posts</div>
+                </div>
+                <div style="cursor: pointer;" onclick="searchByTag('#NextGenSocial')">
+                    <div style="font-size: 11px; color: #888;">Social Innovations • Viral</div>
+                    <div style="font-size: 13px; font-weight: 700; color: #fff;">#NextGenSocial</div>
+                    <div style="font-size: 11px; color: #888;">12.9K posts</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Who to Follow Widget -->
+        <div class="rail-widget">
+            <div class="rail-widget-title">
+                <span>Who to follow</span>
+            </div>
+            <div id="rail-suggested-users" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Dynamically populated suggested users -->
+            </div>
+        </div>
+
+        <!-- Recommended Communities Widget -->
+        <div class="rail-widget">
+            <div class="rail-widget-title">
+                <span>Top Communities</span>
+                <span style="font-size: 11px; color: #0a84ff; cursor: pointer;" onclick="switchView('communities')">View All</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="openCommunityDetail('Gaming & Mods')">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 18px;">🎮</span>
+                        <div>
+                            <div style="font-size: 12px; font-weight: 700; color: #fff;">Gaming & Mods</div>
+                            <div style="font-size: 10px; color: #888;">142K members</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-glass" style="font-size: 10px; padding: 3px 8px;">Join</button>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="openCommunityDetail('Tech & AI')">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 18px;">⚡</span>
+                        <div>
+                            <div style="font-size: 12px; font-weight: 700; color: #fff;">Tech & AI</div>
+                            <div style="font-size: 10px; color: #888;">210K members</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-glass" style="font-size: 10px; padding: 3px 8px;">Join</button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- BOTTOM NAVIGATION (MOBILE) -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('home')" data-target="home"><i class="fa-solid fa-house"></i></div>
+        <div class="nav-item" onclick="switchView('explore')" data-target="explore"><i class="fa-solid fa-compass"></i></div>
+        <div class="nav-item" onclick="switchView('reels')" data-target="reels"><i class="fa-solid fa-clapperboard"></i></div>
+        <div class="nav-item" onclick="switchView('search')" data-target="search"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <div class="nav-item" onclick="switchView('messages')" data-target="messages"><i class="fa-solid fa-comment-dots"></i></div>
+        <div class="nav-item" onclick="switchView('profile')" data-target="profile"><i class="fa-solid fa-user"></i></div>
+    </div>
+
+    <!-- FLOATING CREATE BUTTON (MOBILE/TABLET) -->
+    <button type="button" class="floating-create-btn" onclick="switchView('upload')" title="Create Post">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <!-- FULLSCREEN STORY VIEWER MODAL (INSTAGRAM-STYLE) -->
+    <div id="story-viewer-modal">
+        <div class="story-viewer-content">
+            <!-- Segmented Progress Bars -->
+            <div class="story-progress-bar" id="story-progress-segments">
+                <!-- Segments inserted via JS -->
+            </div>
+
+            <!-- Top Header (Author info + controls) -->
+            <div class="story-header-bar">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <img id="story-viewer-avatar" src="" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" alt="Author">
+                    <div>
+                        <div id="story-viewer-author" style="font-size: 13px; font-weight: 700; color: #fff;"></div>
+                        <div id="story-viewer-time" style="font-size: 10px; color: #ccc;">2h ago</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 14px; font-size: 18px; color: #fff;">
+                    <i class="fa-solid fa-pause" id="story-pause-btn" onclick="toggleStoryPause()" style="cursor: pointer;"></i>
+                    <i class="fa-solid fa-xmark" onclick="closeStoryViewer()" style="cursor: pointer;"></i>
+                </div>
+            </div>
+
+            <!-- Media Stage & Tap Zones -->
+            <div class="story-media-stage" id="story-media-stage">
+                <!-- Story image/video or text canvas -->
+            </div>
+            <div class="story-nav-tap-left" onclick="navigateStory(-1)"></div>
+            <div class="story-nav-tap-right" onclick="navigateStory(1)"></div>
+
+            <!-- Interactive Stickers (Poll / Question) -->
+            <div id="story-interactive-overlay" style="position: absolute; inset: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; z-index: 55;">
+                <!-- Stickers populated via JS -->
+            </div>
+
+            <!-- Bottom Reply & Reactions -->
+            <div class="story-bottom-bar">
+                <input type="text" id="story-reply-input" placeholder="Send reply..." style="flex: 1; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); padding: 10px 16px; border-radius: 24px; color: #fff; font-size: 13px; outline: none;">
+                <div style="display: flex; gap: 10px; font-size: 20px; color: #fff;">
+                    <span style="cursor: pointer;" onclick="sendStoryReaction('❤️')">❤️</span>
+                    <span style="cursor: pointer;" onclick="sendStoryReaction('🔥')">🔥</span>
+                    <span style="cursor: pointer;" onclick="sendStoryReaction('😂')">😂</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE STORY -->
+    <div class="modal-overlay" id="add-story-modal" onclick="closeAddStoryModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="font-size: 18px; font-weight: 800; color: #fff;">Add to Your Story</div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; color: #888;" onclick="closeAddStoryModal()"></i>
+            </div>
+            <textarea id="story-text-input" placeholder="Add text, caption, or thoughts..." style="width: 100%; min-height: 80px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 12px; border-radius: 16px; color: #fff; font-size: 14px; margin-bottom: 12px; outline: none; resize: none;"></textarea>
+            
+            <input type="url" id="story-media-url" placeholder="Paste image/clip URL or choose file..." style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 10px 14px; border-radius: 14px; color: #fff; font-size: 13px; margin-bottom: 12px; outline: none;">
+            
+            <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                <button type="button" class="btn-glass" onclick="triggerStoryFileUpload()" style="font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-camera"></i> Upload Media</button>
+                <button type="button" class="btn-glass" onclick="addStorySampleMedia()" style="font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-sparkles"></i> Preset Aesthetic</button>
+            </div>
+            <input type="file" id="story-file-picker" accept="image/*,video/*" style="display: none;" onchange="handleStoryFileSelected(event)">
+
+            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(48,209,88,0.1); border: 1px solid rgba(48,209,88,0.25); padding: 10px 14px; border-radius: 14px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #30d158; font-weight: 700;">
+                    <i class="fa-solid fa-star"></i> Close Friends Only
+                </div>
+                <div class="toggle-switch" id="story-close-friends-toggle" onclick="this.classList.toggle('active')"></div>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn-glass" onclick="closeAddStoryModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="publishNewStory()">Publish Story (24h)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE PINTEREST BOARD -->
+    <div class="modal-overlay" id="create-board-modal" onclick="closeCreateBoardModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Create New Board</div>
+            <input type="text" id="input-board-title" class="auth-input" placeholder="Board Name (e.g. Design Systems, Minimalist Tech)" required style="margin-bottom: 12px;">
+            <textarea id="input-board-desc" placeholder="Board description (optional)..." style="width: 100%; min-height: 70px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); padding: 10px 14px; border-radius: 14px; color: #fff; font-size: 13px; margin-bottom: 14px; outline: none; resize: none;"></textarea>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); padding: 10px 14px; border-radius: 14px; margin-bottom: 16px;">
+                <div>
+                    <div style="font-size: 13px; font-weight: 700; color: #fff;"><i class="fa-solid fa-lock" style="margin-right: 6px;"></i> Keep this board secret</div>
+                    <div style="font-size: 11px; color: #888;">Only you and collaborators can view this board</div>
+                </div>
+                <div class="toggle-switch" id="board-secret-toggle" onclick="this.classList.toggle('active')"></div>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn-glass" onclick="closeCreateBoardModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="submitCreateBoard()">Create Board</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PINTEREST BOARD DETAIL (MASONRY PINS) -->
+    <div class="modal-overlay" id="board-detail-modal" onclick="closeBoardDetailModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 580px; max-height: 85vh; overflow-y: auto; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                <div>
+                    <div id="board-detail-title" style="font-size: 20px; font-weight: 800; color: #fff;"></div>
+                    <div id="board-detail-desc" style="font-size: 12px; color: #aaa; margin-top: 4px;"></div>
+                </div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; color: #888; font-size: 18px;" onclick="closeBoardDetailModal()"></i>
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                <button type="button" class="btn-glass" onclick="inviteBoardCollaborator()" style="font-size: 11px; padding: 4px 10px;"><i class="fa-solid fa-user-plus"></i> Collaborators</button>
+                <button type="button" class="btn-glass" onclick="shareBoardLink()" style="font-size: 11px; padding: 4px 10px;"><i class="fa-solid fa-share-nodes"></i> Share Board</button>
+            </div>
+            <div class="masonry-grid" id="board-detail-pins" style="padding: 0;">
+                <!-- Dynamic pins in board -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SAVE POST TO BOARD -->
+    <div class="modal-overlay" id="save-to-board-modal" onclick="closeSaveToBoardModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 420px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div style="font-size: 16px; font-weight: 800; color: #fff;">Save to Board</div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; color: #888;" onclick="closeSaveToBoardModal()"></i>
+            </div>
+            <div id="save-boards-selector-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; margin-bottom: 14px;">
+                <!-- Dynamic user boards for saving -->
+            </div>
+            <button type="button" class="btn-glass" onclick="closeSaveToBoardModal(); openCreateBoardModal();" style="width: 100%; padding: 10px; font-size: 13px;">+ Create New Board</button>
+        </div>
+    </div>
+
+    <!-- MODAL: AUDIO / SOUND DETAIL -->
+    <div class="modal-overlay" id="sound-detail-modal" onclick="closeSoundDetailModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 440px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="font-size: 16px; font-weight: 800; color: #fff;">Original Audio</div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; color: #888;" onclick="closeSoundDetailModal()"></i>
+            </div>
+            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
+                <div class="reel-music-disc" style="width: 52px; height: 52px; font-size: 20px;">
+                    <i class="fa-solid fa-music"></i>
+                </div>
+                <div>
+                    <div id="sound-detail-name" style="font-size: 16px; font-weight: 800; color: #fff;">Trending Audio</div>
+                    <div id="sound-detail-creator" style="font-size: 12px; color: #888;">Original sound • 14.2K Reels</div>
+                </div>
+            </div>
+            <button type="button" class="btn-primary" onclick="useSoundInNewReel()" style="width: 100%; padding: 12px; margin-bottom: 12px;">
+                <i class="fa-solid fa-clapperboard"></i> Use this sound in Reel
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: LIVE STREAM BROADCAST SIMULATOR -->
+    <div id="live-broadcast-modal">
+        <div style="position: relative; width: 100%; height: 100%;">
+            <!-- Simulated Live Camera / Video Stream -->
+            <video id="live-stream-video" class="live-stream-feed" autoplay playsinline muted loop src="https://assets.mixkit.co/videos/preview/mixkit-young-woman-talking-on-video-call-with-her-phone-41489-large.mp4"></video>
+
+            <!-- Top Live HUD -->
+            <div style="position: absolute; top: 18px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 50;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #ff3b30; color: #fff; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; letter-spacing: 0.5px;">LIVE</span>
+                    <span style="background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 8px;">
+                        <i class="fa-solid fa-eye" style="margin-right: 5px;"></i> <span id="live-stream-viewers">1,248</span>
+                    </span>
+                </div>
+                <button type="button" class="btn-glass" onclick="endLiveBroadcast()" style="background: rgba(255,59,48,0.7); border-color: #ff3b30; color: #fff; font-size: 12px; padding: 5px 14px;">End Live</button>
+            </div>
+
+            <!-- Live Chat Ticker -->
+            <div class="live-floating-chat" id="live-chat-ticker">
+                <div class="live-chat-bubble"><strong>alex_dev:</strong> Stunning camera clarity! 🔥</div>
+                <div class="live-chat-bubble"><strong>sarah_ux:</strong> Love the iOS26 glass interface 🚀</div>
+                <div class="live-chat-bubble"><strong>kevin_code:</strong> Are you using WebRTC for the call?</div>
+            </div>
+
+            <!-- Bottom Live Comment Bar -->
+            <div style="position: absolute; bottom: 18px; left: 16px; right: 16px; display: flex; gap: 10px; align-items: center; z-index: 50;">
+                <input type="text" id="live-chat-input" placeholder="Comment on live..." style="flex: 1; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 10px 16px; color: #fff; font-size: 13px; outline: none;" onkeydown="if(event.key==='Enter') sendLiveComment()">
+                <button type="button" class="btn-primary" onclick="sendLiveComment()" style="width: 40px; height: 40px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: DRAFTS MANAGER -->
+    <div class="modal-overlay" id="drafts-modal" onclick="closeDraftsModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 440px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div style="font-size: 18px; font-weight: 800; color: #fff;">Saved Drafts</div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; color: #888;" onclick="closeDraftsModal()"></i>
+            </div>
+            <div id="drafts-list-container" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto;">
+                <!-- Dynamically populated drafts -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: VIEW NOTE -->
+    <div class="modal-overlay" id="note-modal" onclick="closeNoteModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="text-align: center;">
+            <img src="" id="modal-note-avatar" style="width: 72px; height: 72px; border-radius: 24px; margin-bottom: 12px; object-fit: cover;">
+            <div id="modal-note-name" style="font-size: 17px; font-weight: 700; margin-bottom: 16px;">User</div>
+            <div id="modal-note-text" style="font-size: 20px; line-height: 1.4; color: #fff; margin-bottom: 24px; font-style: italic;">"Status"</div>
+            <button type="button" class="btn-primary" onclick="closeNoteModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE / UPDATE NOTE -->
+    <div class="modal-overlay" id="create-note-modal" onclick="closeCreateNoteModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Share a Status Note</div>
+            <input type="text" id="input-note-text" placeholder="What's on your mind? (max 60 chars)" maxlength="60"
+                style="width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); padding: 12px; border-radius: 16px; color: #fff; font-size: 14px; margin-bottom: 16px; outline: none;">
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn-glass" onclick="closeCreateNoteModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="submitStatusNote()">Share Note</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: COMMENTS DRAWER -->
+    <div class="modal-overlay" id="comments-modal" onclick="closeCommentsModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-height: 80vh; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="font-size: 17px; font-weight: 700;">Comments</div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 18px; color: #999;" onclick="closeCommentsModal()"></i>
+            </div>
+            <div id="comments-list-container" style="flex: 1; overflow-y: auto; max-height: 340px; padding-right: 4px; margin-bottom: 14px;">
+                <!-- Real-time comments thread -->
+            </div>
+            <!-- Emoji bar for comments -->
+            <div class="emoji-row" style="padding: 4px 0; margin-bottom: 8px;">
+                <span class="emoji-btn" onclick="insertEmojiToComment('❤️')">❤️</span>
+                <span class="emoji-btn" onclick="insertEmojiToComment('🔥')">🔥</span>
+                <span class="emoji-btn" onclick="insertEmojiToComment('👏')">👏</span>
+                <span class="emoji-btn" onclick="insertEmojiToComment('✨')">✨</span>
+                <span class="emoji-btn" onclick="insertEmojiToComment('🚀')">🚀</span>
+            </div>
+            <form onsubmit="handleSendComment(event)" style="display: flex; gap: 10px;">
+                <input type="text" id="comment-input" placeholder="Add a comment..." required
+                    style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); padding: 10px 14px; border-radius: 18px; color: #fff; font-size: 13px; outline: none;">
+                <button type="submit" class="btn-primary" style="padding: 8px 16px;">Post</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: INSTAGRAM-STYLE SHARE SHEET -->
+    <div class="modal-overlay" id="share-sheet-modal" onclick="closeShareSheetModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 440px; border-radius: 28px; padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="font-size: 17px; font-weight: 800; color: #fff;">Share to Friends</div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; color: #888; font-size: 18px;" onclick="closeShareSheetModal()"></i>
+            </div>
+
+            <!-- Search Contacts Bar -->
+            <input type="text" id="share-search-input" placeholder="Search friends or groups..." oninput="filterShareContacts(this.value)"
+                style="width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 10px 14px; color: #fff; font-size: 13px; margin-bottom: 14px; outline: none;">
+
+            <!-- Frequent Contacts List -->
+            <div style="font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Send To</div>
+            <div class="share-sheet-frequent-row" id="share-frequent-contacts-row">
+                <!-- Dynamically populated contacts -->
+            </div>
+
+            <!-- Optional message to accompany share -->
+            <div style="display: flex; gap: 8px; align-items: center; margin: 10px 0 16px;">
+                <input type="text" id="share-message-note" placeholder="Add a message... (e.g., You need to see this 😂)"
+                    style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 10px 14px; color: #fff; font-size: 12px; outline: none;">
+                <button type="button" class="btn-primary" onclick="confirmSendToFriend()" style="padding: 10px 16px; font-size: 12px; white-space: nowrap;">
+                    <i class="fa-regular fa-paper-plane"></i> Send
+                </button>
+            </div>
+
+            <!-- Secondary Actions Grid -->
+            <div class="share-action-grid">
+                <div class="share-grid-btn" onclick="sharePostToStory()">
+                    <i class="fa-solid fa-circle-plus" style="color: #ff2d55;"></i>
+                    <span>Add to Story</span>
+                </div>
+                <div class="share-grid-btn" onclick="openShareCardModal()">
+                    <i class="fa-solid fa-wand-magic-sparkles" style="color: #bf5af2;"></i>
+                    <span>Share Card</span>
+                </div>
+                <div class="share-grid-btn" onclick="copyCurrentPostLink()">
+                    <i class="fa-solid fa-link" style="color: #30d158;"></i>
+                    <span>Copy Link</span>
+                </div>
+                <div class="share-grid-btn" onclick="repostCurrentContent()">
+                    <i class="fa-solid fa-retweet" style="color: #0a84ff;"></i>
+                    <span>Repost</span>
+                </div>
+                <div class="share-grid-btn" onclick="quoteCurrentContent()">
+                    <i class="fa-solid fa-quote-right" style="color: #ff9f0a;"></i>
+                    <span>Quote</span>
+                </div>
+                <div class="share-grid-btn" onclick="openSaveNoteModal()">
+                    <i class="fa-solid fa-bookmark" style="color: #ffd60a;"></i>
+                    <span>Save + Note</span>
+                </div>
+                <div class="share-grid-btn" onclick="remixCurrentContent()">
+                    <i class="fa-solid fa-sliders" style="color: #5ac8fa;"></i>
+                    <span>Remix</span>
+                </div>
+                <div class="share-grid-btn" onclick="nativeDeviceShare()">
+                    <i class="fa-solid fa-arrow-up-from-bracket" style="color: #fff;"></i>
+                    <span>More</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATIVE BRANDED SHARE CARD -->
+    <div class="modal-overlay" id="share-card-modal" onclick="closeShareCardModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 420px; border-radius: 28px; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div style="font-size: 17px; font-weight: 800; color: #fff;">Creative Share Card</div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; color: #888;" onclick="closeShareCardModal()"></i>
+            </div>
+
+            <!-- Card Visual Stage -->
+            <div class="share-card-container aurora" id="share-card-preview-canvas">
+                <!-- Branding Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 26px; height: 26px; border-radius: 8px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #fff;">P</span>
+                        <span style="font-size: 13px; font-weight: 800; letter-spacing: 0.5px; color: #fff;">PLATFROM</span>
+                    </div>
+                    <span style="font-size: 11px; color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 8px;">iOS 26 Edition</span>
+                </div>
+
+                <!-- Media Preview -->
+                <div id="share-card-media-box" style="width: 100%; height: 210px; border-radius: 18px; overflow: hidden; background: #000; margin-bottom: 14px; position: relative;">
+                    <img id="share-card-img" src="" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+
+                <!-- Creator & Caption -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px;">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <img id="share-card-author-avatar" src="" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;">
+                            <span id="share-card-author-name" style="font-weight: 700; font-size: 13px; color: #fff;"></span>
+                        </div>
+                        <div id="share-card-caption" style="font-size: 12px; color: rgba(255,255,255,0.9); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"></div>
+                    </div>
+                    <!-- Styled QR Code -->
+                    <div class="share-card-qr-box">
+                        <i class="fa-solid fa-qrcode" style="font-size: 46px; color: #111;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gradient Theme Switcher -->
+            <div style="display: flex; gap: 10px; justify-content: center; align-items: center; margin: 16px 0 14px;">
+                <span style="font-size: 12px; color: #888;">Theme:</span>
+                <div onclick="setShareCardTheme('aurora')" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #09203f, #537895); cursor: pointer; border: 2px solid #fff;"></div>
+                <div onclick="setShareCardTheme('sunset')" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #431b3e, #8f2d56); cursor: pointer; border: 2px solid transparent;"></div>
+                <div onclick="setShareCardTheme('cyber')" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); cursor: pointer; border: 2px solid transparent;"></div>
+                <div onclick="setShareCardTheme('cosmic')" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #240b36, #c31432); cursor: pointer; border: 2px solid transparent;"></div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="button" class="btn-glass" onclick="downloadShareCardImage()" style="flex: 1; padding: 10px; font-size: 13px;">
+                    <i class="fa-solid fa-download"></i> Save Card
+                </button>
+                <button type="button" class="btn-primary" onclick="copyShareCardLink()" style="flex: 1; padding: 10px; font-size: 13px;">
+                    <i class="fa-solid fa-share-nodes"></i> Share Outside
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: IMMERSIVE FEED VIDEO VIEWER -->
+    <div class="modal-overlay" id="immersive-video-modal" onclick="closeImmersiveVideoModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 520px; background: #000; border-color: rgba(255,255,255,0.15); padding: 16px; border-radius: 28px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <img id="immersive-author-avatar" src="" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                    <div>
+                        <div id="immersive-author-name" style="font-weight: 700; font-size: 14px; color: #fff;"></div>
+                        <div id="immersive-author-handle" style="font-size: 11px; color: #888;"></div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <i class="fa-solid fa-volume-high" id="immersive-volume-icon" onclick="toggleImmersiveAudio()" style="color: #fff; cursor: pointer; font-size: 16px;"></i>
+                    <i class="fa-solid fa-xmark" onclick="closeImmersiveVideoModal()" style="color: #888; cursor: pointer; font-size: 18px;"></i>
+                </div>
+            </div>
+
+            <div style="position: relative; width: 100%; border-radius: 20px; overflow: hidden; background: #05070a;">
+                <video id="immersive-player-element" autoplay playsinline loop controls style="width: 100%; max-height: 65vh; object-fit: contain;"></video>
+            </div>
+
+            <div style="margin-top: 12px;">
+                <div id="immersive-caption-text" style="font-size: 13px; color: #eee; line-height: 1.4; margin-bottom: 8px;"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="post-audio-pill" onclick="openSoundDetailModal()">
+                        <i class="fa-solid fa-compact-disc post-audio-disc-mini"></i>
+                        <span id="immersive-sound-tag">Trending Audio</span>
+                    </div>
+                    <button type="button" class="btn-glass" onclick="remixImmersiveVideo()" style="font-size: 12px; padding: 4px 12px;">
+                        <i class="fa-solid fa-sliders" style="color: #5ac8fa;"></i> Remix
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: QR CODE PROFILE -->
+    <div class="modal-overlay" id="qr-profile-modal" onclick="closeQrProfileModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 360px; text-align: center; border-radius: 28px; padding: 28px 22px;">
+            <div style="width: 68px; height: 68px; margin: 0 auto 14px; position: relative;">
+                <img id="qr-profile-avatar" src="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #0a84ff;">
+            </div>
+            <div id="qr-profile-name" style="font-size: 18px; font-weight: 800; color: #fff;">User Name</div>
+            <div id="qr-profile-handle" style="font-size: 13px; color: #0a84ff; margin-bottom: 20px;">@username</div>
+
+            <div style="background: #fff; padding: 20px; border-radius: 22px; width: 200px; height: 200px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                <i class="fa-solid fa-qrcode" style="font-size: 150px; color: #000;"></i>
+            </div>
+
+            <div style="font-size: 12px; color: #888; margin-bottom: 18px;">
+                Scan to instantly view profile and connect on PLATFROM.
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="button" class="btn-glass" onclick="closeQrProfileModal()" style="flex: 1;">Close</button>
+                <button type="button" class="btn-primary" onclick="copyProfileLink()" style="flex: 1;">Copy Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SAVE + NOTE -->
+    <div class="modal-overlay" id="save-note-modal" onclick="closeSaveNoteModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 400px; border-radius: 24px;">
+            <div style="font-size: 17px; font-weight: 800; margin-bottom: 12px; color: #fff;">Save + Private Note</div>
+            <div style="font-size: 12px; color: #888; margin-bottom: 14px;">Attach a private idea or reminder (visible only to you).</div>
+            <textarea id="save-private-note-input" placeholder="e.g. Try this color palette in next mobile design..."
+                style="width: 100%; min-height: 80px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 12px; color: #fff; font-size: 13px; outline: none; resize: none; margin-bottom: 16px;"></textarea>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn-glass" onclick="closeSaveNoteModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="confirmSaveWithNote()">Save Post</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: EDIT PROFILE -->
+    <div class="modal-overlay" id="edit-profile-modal" onclick="closeEditProfileModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div style="font-size: 18px; font-weight: 800; margin-bottom: 16px;">Edit Profile</div>
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 12px; color: #888;">Display Name</label>
+                <input type="text" id="edit-display-name" class="auth-input" style="margin-top: 4px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 12px; color: #888;">Bio</label>
+                <textarea id="edit-bio" class="auth-input" style="margin-top: 4px; height: 70px; resize: none;"></textarea>
+            </div>
+            <div style="margin-bottom: 16px;">
+                <label style="font-size: 12px; color: #888;">Avatar URL</label>
+                <input type="url" id="edit-avatar-url" class="auth-input" style="margin-top: 4px;">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn-glass" onclick="closeEditProfileModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="saveProfileChanges()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD PORTFOLIO PROJECT -->
+    <div class="modal-overlay" id="add-project-modal" onclick="closeAddProjectModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Add Showcase Project</div>
+            <input type="text" id="proj-title" class="auth-input" placeholder="Project Title" required>
+            <input type="text" id="proj-subtitle" class="auth-input" placeholder="Subtitle / Role (e.g. Creator)">
+            <textarea id="proj-desc" class="auth-input" placeholder="Project description..." style="height: 70px; resize: none;" required></textarea>
+            <input type="text" id="proj-tags" class="auth-input" placeholder="Tags (comma-separated, e.g. React, CSS, AI)">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px;">
+                <button type="button" class="btn-glass" onclick="closeAddProjectModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="submitPortfolioProject()">Add Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: NOTIFICATIONS DRAWER -->
+    <div class="modal-overlay" id="notifications-modal" onclick="closeNotificationsModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-height: 80vh;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="font-size: 18px; font-weight: 800;">Notifications</div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 18px; color: #999;" onclick="closeNotificationsModal()"></i>
+            </div>
+            <div id="notifications-list-container">
+                <!-- Streamed notifications -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: AUTH NOTICE & HELP -->
+    <div class="modal-overlay" id="auth-help-modal" onclick="closeAuthHelpModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 420px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div style="font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-info" style="color: #0a84ff;"></i> Firebase Auth Notice
+                </div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 18px; color: #999;" onclick="closeAuthHelpModal()"></i>
+            </div>
+            <p style="font-size: 13px; line-height: 1.5; color: #ccc; margin-bottom: 14px;">
+                The <strong style="color: #fff;">Email/Password</strong> sign-in provider is disabled by default in your Firebase project.
+            </p>
+            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; font-size: 12px; line-height: 1.6; margin-bottom: 16px; color: #aaa;">
+                <div style="color: #fff; font-weight: 700; margin-bottom: 4px;">Recommended options:</div>
+                <div>1. <strong>Quick Demo Access</strong>: Instant 1-click test mode with full interactivity.</div>
+                <div>2. <strong>Continue with Google</strong>: Connect your Google account for live cloud Firestore persistence.</div>
+                <div>3. <strong>Enable in Console</strong>: To use email/password, open Firebase Console &gt; Authentication &gt; Sign-in method and enable Email/Password.</div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn-glass" onclick="closeAuthHelpModal()">Dismiss</button>
+                <button type="button" class="btn-primary" onclick="closeAuthHelpModal(); handleGuestLogin();">Open Demo Mode</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: LIVE CONSULTATION BOOKING & PAYMENT GATEWAY -->
+    <div class="modal-overlay" id="consultation-booking-modal" onclick="closeConsultationModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div style="font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-video" style="color: #0a84ff;"></i> Live Consultation
+                </div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 18px; color: #999;" onclick="closeConsultationModal()"></i>
+            </div>
+            <p style="font-size: 13px; color: #aaa; margin-bottom: 14px; line-height: 1.4;">
+                Connect 1-on-1 with verified tech leaders for high-impact architecture reviews, UI design critique, and code consultations.
+            </p>
+
+            <!-- Specialist Selection -->
+            <div style="font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; margin-bottom: 8px;">Select Specialist</div>
+            <div class="plan-selector-card selected" id="consultant-moulay" onclick="selectConsultant('moulay', 'Moulay Lhani', 50)">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="https://picsum.photos/seed/moulay_av/80/80" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 700; color: #fff;">Moulay Lhani <span class="badge badge-dev">DEV</span> <span class="badge badge-og">OG</span></div>
+                        <div style="font-size: 11px; color: #999;">Lead Architect & Platform Creator</div>
+                    </div>
+                </div>
+                <div style="font-size: 14px; font-weight: 800; color: #30d158;">$50<span style="font-size: 11px; color: #888;">/30m</span></div>
+            </div>
+
+            <div class="plan-selector-card" id="consultant-sarah" onclick="selectConsultant('sarah', 'Sarah Jenkins', 40)">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="https://picsum.photos/seed/sarah/80/80" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 700; color: #fff;">Sarah Jenkins</div>
+                        <div style="font-size: 11px; color: #999;">Glass UI & Design Systems Lead</div>
+                    </div>
+                </div>
+                <div style="font-size: 14px; font-weight: 800; color: #30d158;">$40<span style="font-size: 11px; color: #888;">/30m</span></div>
+            </div>
+
+            <!-- Duration Selection -->
+            <div style="font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; margin: 14px 0 8px;">Session Duration</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px;">
+                <div class="category-chip" id="duration-15" onclick="selectDuration(15, 25)" style="text-align: center; padding: 10px 4px;">15 Min ($25)</div>
+                <div class="category-chip active" id="duration-30" onclick="selectDuration(30, 50)" style="text-align: center; padding: 10px 4px;">30 Min ($50)</div>
+                <div class="category-chip" id="duration-60" onclick="selectDuration(60, 95)" style="text-align: center; padding: 10px 4px;">60 Min ($95)</div>
+            </div>
+
+            <!-- Secure Payment Gateway Form -->
+            <div class="payment-card-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="font-size: 13px; font-weight: 700; color: #fff;">Payment Method</div>
+                    <div class="secure-badge"><i class="fa-solid fa-lock"></i> 256-Bit Encrypted</div>
+                </div>
+
+                <input type="text" id="pay-card-name" class="auth-input" placeholder="Cardholder Name" value="Mohamed Huguh" style="margin-bottom: 8px;">
+                <input type="text" id="pay-card-number" class="auth-input" placeholder="Card Number (•••• •••• •••• ••••)" maxlength="19" value="4242 •••• •••• 4242" style="margin-bottom: 8px;">
+                <div class="card-input-row">
+                    <input type="text" id="pay-card-exp" class="auth-input" placeholder="MM/YY" maxlength="5" value="12/28" style="flex: 1; margin-bottom: 8px;">
+                    <input type="text" id="pay-card-cvc" class="auth-input" placeholder="CVC" maxlength="4" value="888" style="flex: 1; margin-bottom: 8px;">
+                    <input type="text" id="pay-card-zip" class="auth-input" placeholder="ZIP Code" maxlength="6" value="10001" style="flex: 1; margin-bottom: 8px;">
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: 11px; color: #777;">
+                    <span><i class="fa-brands fa-cc-visa" style="font-size: 16px; margin-right: 4px; color: #fff;"></i> <i class="fa-brands fa-cc-mastercard" style="font-size: 16px; margin-right: 4px; color: #fff;"></i> <i class="fa-brands fa-cc-apple-pay" style="font-size: 16px; color: #fff;"></i></span>
+                    <span>PCI-DSS Level 1 Certified</span>
+                </div>
+            </div>
+
+            <button type="button" class="btn-primary" id="btn-confirm-consultation-pay" onclick="handlePayAndStartConsultation()" style="width: 100%; padding: 14px; font-size: 15px; border-radius: 18px; margin-top: 4px;">
+                <i class="fa-solid fa-lock"></i> Pay $50 & Start Video Session
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: FULL-SCREEN LIVE CONSULTATION VIDEO ROOM -->
+    <div id="consultation-room-modal">
+        <!-- Top Bar -->
+        <div class="consult-top-bar">
+            <div class="consult-pill">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #30d158; box-shadow: 0 0 8px #30d158;"></span>
+                <span id="consult-room-specialist-name">Moulay Lhani</span>
+                <span class="badge badge-dev">DEV</span>
+            </div>
+            <div class="consult-pill">
+                <i class="fa-regular fa-clock" style="color: #30d158;"></i>
+                <span class="consult-timer" id="consultation-timer-text">00:00</span>
+            </div>
+            <div class="consult-pill" onclick="toggleConsultationNotes()" style="cursor: pointer;">
+                <i class="fa-solid fa-note-sticky"></i> Notes
+            </div>
+        </div>
+
+        <!-- Video Stage -->
+        <div class="consult-stage">
+            <!-- Remote Consultant Feed -->
+            <div class="remote-video-container">
+                <img id="remote-consultant-stream" src="https://picsum.photos/seed/moulay_av/600/800" class="remote-video-feed" alt="Consultant Video">
+                <div style="position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); padding: 6px 14px; border-radius: 20px; font-size: 12px; color: #fff;">
+                    <i class="fa-solid fa-signal" style="color: #30d158; margin-right: 6px;"></i> HD 1080p WebRTC Encrypted
+                </div>
+            </div>
+
+            <!-- Local PiP Camera Feed -->
+            <div class="local-pip-container" id="local-pip-box">
+                <video id="local-pip-video" autoplay playsinline muted class="local-pip-video"></video>
+                <div id="local-pip-fallback" style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; background: #1a1a1a; color: #888; font-size: 11px; text-align: center; padding: 4px;">
+                    Camera Off
+                </div>
+            </div>
+
+            <!-- In-Call Notes Drawer -->
+            <div id="consultation-notes-drawer" style="display: none; position: absolute; top: 70px; right: 16px; width: 260px; background: rgba(13,18,28,0.92); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.15); border-radius: 18px; padding: 14px; z-index: 30; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-size: 13px; font-weight: 700; color: #fff;">Session Notes</div>
+                    <i class="fa-solid fa-xmark" onclick="toggleConsultationNotes()" style="cursor: pointer; font-size: 14px; color: #888;"></i>
+                </div>
+                <textarea id="consultation-notes-input" placeholder="Take notes during consultation..." style="width: 100%; height: 160px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px; color: #fff; font-size: 12px; resize: none; outline: none;"></textarea>
+                <button type="button" class="btn-glass" onclick="saveConsultationNotes()" style="width: 100%; font-size: 11px; margin-top: 8px;">Save to Device</button>
+            </div>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="consult-controls-bar">
+            <button type="button" class="ctrl-btn" id="btn-consult-mic" onclick="toggleConsultationMic()" title="Mute / Unmute">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+            <button type="button" class="ctrl-btn" id="btn-consult-cam" onclick="toggleConsultationCam()" title="Camera On / Off">
+                <i class="fa-solid fa-video"></i>
+            </button>
+            <button type="button" class="ctrl-btn" id="btn-consult-screen" onclick="toggleConsultationScreenShare()" title="Share Screen">
+                <i class="fa-solid fa-arrow-up-from-bracket"></i>
+            </button>
+            <button type="button" class="ctrl-btn hangup" onclick="endConsultationCall()" title="End Session">
+                <i class="fa-solid fa-phone-slash"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: REAL-TIME AI ASSISTANT SHEET -->
+    <div id="ai-assistant-modal" onclick="closeAiAssistantModal()">
+        <div class="ai-sheet" onclick="event.stopPropagation()">
+            <!-- AI Header -->
+            <div style="padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 34px; height: 34px; border-radius: 12px; background: linear-gradient(135deg, #0a84ff, #bf5af2); display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; box-shadow: 0 0 14px rgba(191,90,242,0.5);">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 6px;">
+                            Platform AI Consultant <span class="badge badge-ai">LIVE</span>
+                        </div>
+                        <div style="font-size: 11px; color: #30d158; display: flex; align-items: center; gap: 4px;">
+                            <span style="width: 6px; height: 6px; border-radius: 50%; background: #30d158;"></span> Real-Time Complex Query Engine
+                        </div>
+                    </div>
+                </div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 20px; color: #888;" onclick="closeAiAssistantModal()"></i>
+            </div>
+
+            <!-- AI Prompt Quick Suggestions -->
+            <div style="padding: 10px 18px 4px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;">
+                <div class="category-chip" onclick="sendQuickAiQuery('Analyze full-stack architecture best practices for glassmorphism web apps.')">⚡ Architecture Review</div>
+                <div class="category-chip" onclick="sendQuickAiQuery('How do live professional consultations and encrypted payments work on Platform?')">🎥 Consultation Help</div>
+                <div class="category-chip" onclick="sendQuickAiQuery('Draft a high-engagement tech post about futuristic WebRTC video streaming.')">✍️ Draft Viral Post</div>
+            </div>
+
+            <!-- AI Messages Thread -->
+            <div id="ai-chat-thread" style="flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;">
+                <div class="message-bubble incoming" style="max-width: 85%;">
+                    Hello! I'm your real-time AI consultant. I can analyze complex technical architectures, optimize your platform workflow, guide consultation sessions, or answer any engineering questions immediately. How can I assist you today?
+                </div>
+            </div>
+
+            <!-- AI Input Form -->
+            <form onsubmit="handleSendAiQuery(event)" style="padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; gap: 10px; background: rgba(10,14,22,0.95);">
+                <input type="text" id="ai-user-query" placeholder="Ask any complex technical question..." required autocomplete="off"
+                    style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); padding: 12px 16px; border-radius: 20px; color: #fff; font-size: 14px; outline: none;">
+                <button type="submit" class="btn-primary" id="btn-send-ai" style="border-radius: 20px; padding: 10px 20px;">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADULT CONTENT RESTRICTION WARNING -->
+    <div class="modal-overlay" id="safety-warning-modal" onclick="closeSafetyWarningModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 400px; text-align: center; border-color: rgba(255,69,58,0.4); box-shadow: 0 0 35px rgba(255,69,58,0.25);">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255,69,58,0.15); border: 2px solid rgba(255,69,58,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #ff453a; font-size: 26px;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div style="font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 8px;">Adult Content Restriction</div>
+            <p id="safety-warning-text" style="font-size: 13px; line-height: 1.5; color: #ddd; margin-bottom: 20px;">
+                Our real-time AI moderation system detected adult or sexually explicit content in this upload. Platform strictly prohibits adult media.
+            </p>
+            <button type="button" class="btn-primary" onclick="closeSafetyWarningModal()" style="width: 100%; background: #ff453a; border-color: #ff453a;">
+                I Understand
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: FOLLOWERS / FOLLOWING LIST -->
+    <div class="modal-overlay" id="users-list-modal" onclick="closeUsersListModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-height: 80vh; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="font-size: 18px; font-weight: 800;" id="users-list-title">Followers</div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 18px; color: #999;" onclick="closeUsersListModal()"></i>
+            </div>
+            <div id="users-list-container" style="flex: 1; overflow-y: auto; max-height: 380px;">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: BLOCKED USERS MANAGEMENT -->
+    <div class="modal-overlay" id="blocked-users-modal" onclick="closeBlockedUsersModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-height: 80vh; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="font-size: 18px; font-weight: 800;">Blocked Accounts</div>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 18px; color: #999;" onclick="closeBlockedUsersModal()"></i>
+            </div>
+            <p style="font-size: 12px; color: #888; margin-bottom: 14px;">
+                Blocked users cannot view your posts, send direct messages, or follow your profile.
+            </p>
+            <div id="blocked-users-container" style="flex: 1; overflow-y: auto; max-height: 340px;">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: IN-CONVO ENCRYPTED VOICE CALL -->
+    <div class="modal-overlay" id="convo-audio-call-modal" style="z-index: 9999;">
+        <div class="modal-content" style="text-align: center; max-width: 320px; padding: 32px 22px; background: rgba(15,20,30,0.96); border: 1px solid rgba(255,255,255,0.15); border-radius: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.8);">
+            <div class="call-avatar-pulse">
+                <img id="convo-call-avatar" src="https://picsum.photos/120/120" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #30d158;">
+            </div>
+            <div id="convo-call-name" style="font-size: 18px; font-weight: 800; margin-top: 14px; color: #fff;">User Name</div>
+            <div id="convo-call-status" style="font-size: 12px; color: #30d158; margin: 6px 0 18px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <i class="fa-solid fa-lock" style="font-size: 10px; color: #ffd60a;"></i> Encrypted Voice Call • <span id="convo-call-timer">00:00</span>
+            </div>
+            <div style="display: flex; justify-content: center; gap: 16px; margin-top: 20px;">
+                <button type="button" class="ctrl-btn" id="btn-convo-mute" onclick="toggleConvoCallMute()" title="Mute Microphone" style="width: 50px; height: 50px; font-size: 17px;">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+                <button type="button" class="ctrl-btn" id="btn-convo-speaker" onclick="toggleConvoCallSpeaker()" title="Speaker" style="width: 50px; height: 50px; font-size: 17px;">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <button type="button" class="ctrl-btn hangup" onclick="endConvoCall()" title="End Call" style="width: 50px; height: 50px; font-size: 17px;">
+                    <i class="fa-solid fa-phone-slash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- APPLICATION CORE SCRIPTS -->
+<script type="module" src="app.js"></script>
+</body>
+</html>

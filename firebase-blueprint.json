@@ -1,0 +1,99 @@
+{
+  "entities": {
+    "users": {
+      "fields": {
+        "uid": { "type": "string", "description": "Unique identifier for user" },
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "Full display name" },
+        "username": { "type": "string", "description": "Unique handle without @" },
+        "photoURL": { "type": "string", "description": "Avatar URL" },
+        "bio": { "type": "string", "description": "User bio text" },
+        "isDev": { "type": "boolean", "description": "Developer badge flag" },
+        "isOG": { "type": "boolean", "description": "Early adopter badge flag" },
+        "postsCount": { "type": "number", "description": "Count of published posts" },
+        "followersCount": { "type": "number", "description": "Follower count" },
+        "followingCount": { "type": "number", "description": "Following count" },
+        "createdAt": { "type": "timestamp", "description": "Account registration timestamp" }
+      }
+    },
+    "posts": {
+      "fields": {
+        "authorId": { "type": "string", "description": "Author UID" },
+        "authorName": { "type": "string", "description": "Author display name" },
+        "authorUsername": { "type": "string", "description": "Author handle" },
+        "authorAvatar": { "type": "string", "description": "Author avatar URL" },
+        "authorIsDev": { "type": "boolean", "description": "Author Dev badge" },
+        "authorIsOG": { "type": "boolean", "description": "Author OG badge" },
+        "caption": { "type": "string", "description": "Post caption body" },
+        "mediaUrl": { "type": "string", "description": "Attached media URL" },
+        "likesCount": { "type": "number", "description": "Count of likes" },
+        "likes": { "type": "map", "description": "Map of user IDs who liked the post" },
+        "commentsCount": { "type": "number", "description": "Count of comments" },
+        "quotedPost": { "type": "map", "description": "Quoted post snapshot if quote post" },
+        "createdAt": { "type": "timestamp", "description": "Creation timestamp" }
+      }
+    },
+    "notes": {
+      "fields": {
+        "userId": { "type": "string", "description": "Author UID" },
+        "userName": { "type": "string", "description": "Author name" },
+        "userAvatar": { "type": "string", "description": "Author avatar URL" },
+        "text": { "type": "string", "description": "Note status message" },
+        "createdAt": { "type": "timestamp", "description": "Creation timestamp" }
+      }
+    },
+    "chats": {
+      "fields": {
+        "participants": { "type": "array", "description": "List of user UIDs" },
+        "lastMessage": { "type": "string", "description": "Snippet of last message" },
+        "lastMessageTime": { "type": "timestamp", "description": "Timestamp of last message" },
+        "lastSenderId": { "type": "string", "description": "UID of last sender" }
+      }
+    },
+    "notifications": {
+      "fields": {
+        "recipientId": { "type": "string", "description": "Recipient UID" },
+        "senderId": { "type": "string", "description": "Sender UID" },
+        "senderName": { "type": "string", "description": "Sender name" },
+        "senderAvatar": { "type": "string", "description": "Sender avatar" },
+        "type": { "type": "string", "description": "Notification category" },
+        "content": { "type": "string", "description": "Summary text" },
+        "read": { "type": "boolean", "description": "Read flag" },
+        "createdAt": { "type": "timestamp", "description": "Timestamp" }
+      }
+    },
+    "boards": {
+      "fields": {
+        "userId": { "type": "string", "description": "Board owner UID" },
+        "title": { "type": "string", "description": "Board name" },
+        "description": { "type": "string", "description": "Board description" },
+        "category": { "type": "string", "description": "Topic category" },
+        "isPrivate": { "type": "boolean", "description": "Secret board flag" },
+        "postIds": { "type": "array", "description": "Pinned post IDs" },
+        "createdAt": { "type": "timestamp", "description": "Creation timestamp" }
+      }
+    },
+    "stories": {
+      "fields": {
+        "authorId": { "type": "string", "description": "Author UID" },
+        "authorName": { "type": "string", "description": "Author name" },
+        "authorAvatar": { "type": "string", "description": "Author avatar" },
+        "type": { "type": "string", "description": "photo | video | text" },
+        "mediaUrl": { "type": "string", "description": "Media URL" },
+        "text": { "type": "string", "description": "Story text" },
+        "poll": { "type": "map", "description": "Optional poll data" },
+        "question": { "type": "string", "description": "Optional question sticker" },
+        "createdAt": { "type": "timestamp", "description": "Creation timestamp" }
+      }
+    },
+    "communities": {
+      "fields": {
+        "name": { "type": "string", "description": "Community name" },
+        "topic": { "type": "string", "description": "Topic category" },
+        "description": { "type": "string", "description": "Community description" },
+        "icon": { "type": "string", "description": "FontAwesome icon" },
+        "memberCount": { "type": "number", "description": "Total member count" }
+      }
+    }
+  }
+}
